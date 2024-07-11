@@ -49,9 +49,9 @@ jobs:
           sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd /home/anhye0n/web/tutorial_sejong/backend/
             git submodule update --init --recursive
-            CURRENT_PID=\$(pgrep -f 'java -jar')
+            CURRENT_PID=\$(lsof -t -i:8080)
             if [ -n "\$CURRENT_PID" ]; then
-              echo "Stopping current process with PID \$CURRENT_PID"
+              echo "Stopping process using port 8080 with PID \$CURRENT_PID"
               echo ${{ secrets.SSH_PASSWORD }} | sudo -S kill -9 \$CURRENT_PID
             fi
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl start tutorial_sejong_backend
