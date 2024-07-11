@@ -48,9 +48,8 @@ jobs:
         run: |
           sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd /home/anhye0n/web/tutorial_sejong/backend/
-            git submodule init
-            git submodule update
-            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl stop build_test
-            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl start build_test
-            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl status build_test
+            git submodule update --init --recursive
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl stop tutorial_sejong_backend
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl start tutorial_sejong_backend
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl status tutorial_sejong_backend
           EOF
