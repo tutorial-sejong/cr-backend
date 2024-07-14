@@ -51,13 +51,13 @@ public class ScheduleController {
         if (!invalidParams.isEmpty()) {
             String message = "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")";
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorDto(new Date(), message, request.getDescription(false)));
+                    .body(new ErrorDto(new Date(), 400, message, request.getDescription(false)));
         }
 
         List<Schedule> searchResult = scheduleService.getSearchResultSchedules(new ScheduleSearchRequest(schCollegeAlias, schDeptAlias, curiTypeCdNm, sltDomainCdNm, curiNm, lesnEmp));
 
         if (searchResult.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(new Date(), "검색된 값 없음", request.getDescription(false)));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(new Date(), 404, "검색된 값 없음", request.getDescription(false)));
         }
 
         return ResponseEntity.ok().body(searchResult);
