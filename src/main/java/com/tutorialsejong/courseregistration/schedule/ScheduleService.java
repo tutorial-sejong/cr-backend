@@ -1,7 +1,7 @@
 package com.tutorialsejong.courseregistration.schedule;
 
 import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
-import com.tutorialsejong.courseregistration.schedule.model.Schedule;
+import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +22,15 @@ public class ScheduleService {
     }
 
     public List<Schedule> getSearchResultSchedules(ScheduleSearchRequest scheduleSearchRequest) {
-        return scheduleRepository.findAllBy(
+        List<Schedule> findAllByResult = scheduleRepository.findAllBy(
+                scheduleSearchRequest.schCollegeAlias(),
+                scheduleSearchRequest.schDeptAlias(),
                 scheduleSearchRequest.curiTypeCdNm(),
                 scheduleSearchRequest.sltDomainCdNm(),
                 scheduleSearchRequest.curiNm(),
                 scheduleSearchRequest.lesnEmp()
         );
+
+        return findAllByResult.isEmpty() ? List.of() : findAllByResult;
     }
 }

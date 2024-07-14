@@ -1,4 +1,4 @@
-package com.tutorialsejong.courseregistration.schedule.model;
+package com.tutorialsejong.courseregistration.schedule.entity;
 
 import java.io.Serializable;
 import java.util.Objects;
