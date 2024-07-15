@@ -15,6 +15,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = true)
+    private String refreshToken;
+
     public User(final String studentId, final String password) {
         this.studentId = studentId;
         this.password = password;
@@ -30,5 +33,13 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }
