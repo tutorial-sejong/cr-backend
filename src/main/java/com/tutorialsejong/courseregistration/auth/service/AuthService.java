@@ -77,15 +77,10 @@ public class AuthService {
     }
 
     public JwtResponseDTO refreshAccessToken(String refreshToken) {
-        validateRefreshToken(refreshToken);
         Authentication authentication = getAuthenticationFromRefreshToken(refreshToken);
         User user = getUserFromAuthentication(authentication);
         verifyRefreshTokenOwnership(user, refreshToken);
         return generateNewAccessToken(user, authentication);
-    }
-
-    private void validateRefreshToken(String refreshToken) {
-        tokenProvider.validateToken(refreshToken, false);
     }
 
     private Authentication getAuthenticationFromRefreshToken(String refreshToken) {

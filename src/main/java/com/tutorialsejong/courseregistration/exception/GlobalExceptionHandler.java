@@ -1,9 +1,11 @@
 package com.tutorialsejong.courseregistration.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,18 +15,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.security.SignatureException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -50,19 +44,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class})
-    public ResponseEntity<?> handleJwtException(JwtException ex) {
-        logger.error("Invalid JWT token: {}", ex.getMessage());
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex) {
+        logger.error("JWT authentication error: {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
-        body.put("message", Collections.singletonList("유효하지 않은 토큰입니다."));
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
-    }
-
-    @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<?> handleExpiredJwtException(ExpiredJwtException ex) {
-        logger.error("JWT token expired: {}", ex.getMessage());
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", Collections.singletonList("토큰이 만료되었습니다."));
+        if (ex.getCause() instanceof ExpiredJwtException) {
+            body.put("message", Collections.singletonList("토큰이 만료되었습니다."));
+        } else {
+            body.put("message", Collections.singletonList("유효하지 않은 토큰입니다."));
+        }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
