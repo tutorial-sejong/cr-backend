@@ -17,7 +17,7 @@ public class Schedule {
 
     @Id
     @Column(name = "class")
-    private String class_;
+    private String classNo;
 
     @Column(name = "sch_college_alias")
     private String schCollegeAlias;
@@ -67,157 +67,79 @@ public class Schedule {
     @Column(name = "remark")
     private String remark;
 
-    // Getters and setters
-
     public String getSchDeptAlias() {
         return schDeptAlias;
-    }
-
-    public void setSchDeptAlias(String schDeptAlias) {
-        this.schDeptAlias = schDeptAlias;
     }
 
     public String getCuriNo() {
         return curiNo;
     }
 
-    public void setCuriNo(String curiNo) {
-        this.curiNo = curiNo;
-    }
-
-    public String getClass_() {
-        return class_;
-    }
-
-    public void setClass_(String class_) {
-        this.class_ = class_;
+    public String getClassNo() {
+        return classNo;
     }
 
     public String getSchCollegeAlias() {
         return schCollegeAlias;
     }
 
-    public void setSchCollegeAlias(String schCollegeAlias) {
-        this.schCollegeAlias = schCollegeAlias;
-    }
-
     public String getCuriNm() {
         return curiNm;
-    }
-
-    public void setCuriNm(String curiNm) {
-        this.curiNm = curiNm;
     }
 
     public String getCuriLangNm() {
         return curiLangNm;
     }
 
-    public void setCuriLangNm(String curiLangNm) {
-        this.curiLangNm = curiLangNm;
-    }
-
     public String getCuriTypeCdNm() {
         return curiTypeCdNm;
-    }
-
-    public void setCuriTypeCdNm(String curiTypeCdNm) {
-        this.curiTypeCdNm = curiTypeCdNm;
     }
 
     public String getSltDomainCdNm() {
         return sltDomainCdNm;
     }
 
-    public void setSltDomainCdNm(String sltDomainCdNm) {
-        this.sltDomainCdNm = sltDomainCdNm;
-    }
-
     public String getTmNum() {
         return tmNum;
-    }
-
-    public void setTmNum(String tmNum) {
-        this.tmNum = tmNum;
     }
 
     public String getStudentYear() {
         return studentYear;
     }
 
-    public void setStudentYear(String studentYear) {
-        this.studentYear = studentYear;
-    }
-
     public String getCorsUnitGrpCdNm() {
         return corsUnitGrpCdNm;
-    }
-
-    public void setCorsUnitGrpCdNm(String corsUnitGrpCdNm) {
-        this.corsUnitGrpCdNm = corsUnitGrpCdNm;
     }
 
     public String getManageDeptNm() {
         return manageDeptNm;
     }
 
-    public void setManageDeptNm(String manageDeptNm) {
-        this.manageDeptNm = manageDeptNm;
-    }
-
     public String getLesnEmp() {
         return lesnEmp;
-    }
-
-    public void setLesnEmp(String lesnEmp) {
-        this.lesnEmp = lesnEmp;
     }
 
     public String getLesnTime() {
         return lesnTime;
     }
 
-    public void setLesnTime(String lesnTime) {
-        this.lesnTime = lesnTime;
-    }
-
     public String getLesnRoom() {
         return lesnRoom;
-    }
-
-    public void setLesnRoom(String lesnRoom) {
-        this.lesnRoom = lesnRoom;
     }
 
     public String getCyberTypeCdNm() {
         return cyberTypeCdNm;
     }
 
-    public void setCyberTypeCdNm(String cyberTypeCdNm) {
-        this.cyberTypeCdNm = cyberTypeCdNm;
-    }
-
     public String getInternshipTypeCdNm() {
         return internshipTypeCdNm;
-    }
-
-    public void setInternshipTypeCdNm(String internshipTypeCdNm) {
-        this.internshipTypeCdNm = internshipTypeCdNm;
     }
 
     public String getInoutSubCdtExchangeYn() {
         return inoutSubCdtExchangeYn;
     }
 
-    public void setInoutSubCdtExchangeYn(String inoutSubCdtExchangeYn) {
-        this.inoutSubCdtExchangeYn = inoutSubCdtExchangeYn;
-    }
-
     public String getRemark() {
         return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
     }
 }
