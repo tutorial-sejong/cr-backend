@@ -6,14 +6,14 @@ import java.util.Objects;
 public class ScheduleId implements Serializable {
     private String schDeptAlias;
     private String curiNo;
-    private String class_;
+    private String classNo;
 
     public ScheduleId() {}
 
-    public ScheduleId(String schDeptAlias, String curiNo, String class_) {
+    public ScheduleId(String schDeptAlias, String curiNo, String classNo) {
         this.schDeptAlias = schDeptAlias;
         this.curiNo = curiNo;
-        this.class_ = class_;
+        this.classNo = classNo;
     }
 
     public String getschDeptAlias() {
@@ -33,11 +33,11 @@ public class ScheduleId implements Serializable {
     }
 
     public String getCLASS() {
-        return class_;
+        return classNo;
     }
 
     public void setCLASS(String CLASS) {
-        this.class_ = CLASS;
+        this.classNo = CLASS;
     }
 
     // equals and hashCode methods
@@ -48,11 +48,11 @@ public class ScheduleId implements Serializable {
         ScheduleId that = (ScheduleId) o;
         return Objects.equals(schDeptAlias, that.schDeptAlias) &&
                 Objects.equals(curiNo, that.curiNo) &&
-                Objects.equals(class_, that.class_);
+                Objects.equals(classNo, that.classNo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(schDeptAlias, curiNo, class_);
+        return Objects.hash(schDeptAlias, curiNo, classNo);
     }
 }
