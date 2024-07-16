@@ -36,20 +36,37 @@ public class AuthService {
     }
 
     public JwtResponseDTO loginOrSignup(LoginRequestDTO loginRequest) {
-        User user = userRepository.findByStudentId(loginRequest.studentId()).orElseGet(() -> {
-            User newUser = new User(loginRequest.studentId(), passwordEncoder.encode(loginRequest.password()));
-            return userRepository.save(newUser);
-        });
+        User user = findOrCreateUser(loginRequest);
+        Authentication authentication = authenticate(loginRequest);
+        return generateTokens(authentication, user);
+    }
 
+    private User findOrCreateUser(LoginRequestDTO loginRequest) {
+        return userRepository.findByStudentId(loginRequest.studentId())
+                .orElseGet(() -> createNewUser(loginRequest));
+    }
+
+    private User createNewUser(LoginRequestDTO loginRequest) {
+        User newUser = new User(loginRequest.studentId(), encodePassword(loginRequest.password()));
+        return userRepository.save(newUser);
+    }
+
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    private Authentication authenticate(LoginRequestDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.studentId(),
                         loginRequest.password()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        return authentication;
+    }
 
+    private JwtResponseDTO generateTokens(Authentication authentication, User user) {
         String accessToken = tokenProvider.generateAccessToken(authentication);
         String refreshToken = tokenProvider.generateRefreshToken(authentication);
 
@@ -59,23 +76,40 @@ public class AuthService {
         return new JwtResponseDTO(accessToken, refreshToken);
     }
 
-    public JwtResponseDTO refreshToken(String refreshToken) {
+    public JwtResponseDTO refreshAccessToken(String refreshToken) {
+        validateRefreshToken(refreshToken);
+        Authentication authentication = getAuthenticationFromRefreshToken(refreshToken);
+        User user = getUserFromAuthentication(authentication);
+        verifyRefreshTokenOwnership(user, refreshToken);
+        return generateNewAccessToken(user, authentication);
+    }
+
+    private void validateRefreshToken(String refreshToken) {
         tokenProvider.validateToken(refreshToken, false);
-        Authentication authentication = tokenProvider.getAuthenticationToken(refreshToken, false);
+    }
 
-        User user = userRepository.findByStudentId(authentication.getName())
+    private Authentication getAuthenticationFromRefreshToken(String refreshToken) {
+        return tokenProvider.getAuthenticationToken(refreshToken, false);
+    }
+
+    private User getUserFromAuthentication(Authentication authentication) {
+        return userRepository.findByStudentId(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
 
+    private void verifyRefreshTokenOwnership(User user, String refreshToken) {
         if (!user.getRefreshToken().equals(refreshToken)) {
             throw new InvalidRefreshTokenException("Invalid refresh token");
         }
+    }
 
+    private JwtResponseDTO generateNewAccessToken(User user, Authentication authentication) {
         List<GrantedAuthority> authorities = authentication.getAuthorities().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                 .collect(Collectors.toList());
         Authentication newAuthentication = new UsernamePasswordAuthenticationToken(user.getStudentId(), null, authorities);
 
         String newAccessToken = tokenProvider.generateAccessToken(newAuthentication);
-        return new JwtResponseDTO(newAccessToken, refreshToken);
+        return new JwtResponseDTO(newAccessToken, user.getRefreshToken());
     }
 }
