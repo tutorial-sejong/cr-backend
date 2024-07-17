@@ -54,6 +54,6 @@ jobs:
               echo "Stopping process using port 8080 with PID \$CURRENT_PID"
               echo ${{ secrets.SSH_PASSWORD }} | sudo -S kill -9 \$CURRENT_PID
             fi
-            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl start tutorial_sejong_backend
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl restart tutorial_sejong_backend
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl status tutorial_sejong_backend
           EOF
