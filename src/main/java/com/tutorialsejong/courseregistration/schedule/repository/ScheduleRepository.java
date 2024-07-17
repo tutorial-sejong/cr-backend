@@ -1,4 +1,4 @@
-package com.tutorialsejong.courseregistration.schedule;
+package com.tutorialsejong.courseregistration.schedule.repository;
 
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;

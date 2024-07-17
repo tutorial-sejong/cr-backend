@@ -1,7 +1,8 @@
-package com.tutorialsejong.courseregistration.schedule;
+package com.tutorialsejong.courseregistration.schedule.service;
 
 import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
