@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
-        JwtResponseDTO jwtResponse = authService.refreshToken(refreshToken);
+        JwtResponseDTO jwtResponse = authService.refreshAccessToken(refreshToken);
 
         Map<String, Object> body = new HashMap<>();
         body.put("accessToken", jwtResponse.accessToken());

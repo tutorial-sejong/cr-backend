@@ -1,6 +1,8 @@
 package com.tutorialsejong.courseregistration.auth;
 
+import com.tutorialsejong.courseregistration.exception.JwtAuthenticationException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
@@ -43,12 +45,13 @@ public class JwtTokenProvider {
 
     private String generateToken(Authentication authentication, Key secret, int expirationInMs) {
         String username = authentication.getName();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationInMs);
 
         return Jwts.builder()
                 .setSubject(username)
-                .claim("authorities", authentication.getAuthorities().stream()
+                .claim("authorities", authorities.stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()))
                 .setIssuedAt(now)
@@ -58,12 +61,7 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthenticationToken(String token, boolean isAccessToken) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(isAccessToken ? accessTokenSecret : refreshTokenSecret)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
+        Claims claims = validateAndParseToken(token, isAccessToken);
         String username = claims.getSubject();
         List<String> authorities = claims.get("authorities", List.class);
 
@@ -74,10 +72,15 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
     }
 
-    public void validateToken(String authToken, boolean isAccessToken) {
-        Jwts.parserBuilder()
-                .setSigningKey(isAccessToken ? accessTokenSecret : refreshTokenSecret)
-                .build()
-                .parseClaimsJws(authToken);
+    private Claims validateAndParseToken(String token, boolean isAccessToken) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(isAccessToken ? accessTokenSecret : refreshTokenSecret)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            throw new JwtAuthenticationException("Invalid JWT token", e);
+        }
     }
 }
