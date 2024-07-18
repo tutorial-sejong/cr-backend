@@ -1,6 +1,5 @@
 package com.tutorialsejong.courseregistration.desired.entity;
 
-import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import jakarta.persistence.*;
 

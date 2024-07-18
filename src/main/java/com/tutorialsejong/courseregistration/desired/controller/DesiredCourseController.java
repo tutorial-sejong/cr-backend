@@ -7,10 +7,7 @@ import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +28,13 @@ public class DesiredCourseController {
         desiredCourseService.saveDesiredCourse(desiredCourseRequest.studentId(), desiredCourseRequest.desiredCourseList());
 
         return ResponseEntity.status(HttpStatus.CREATED).body("관심과목이 저장되었습니다.");
+    }
+
+    @GetMapping()
+    public ResponseEntity<?> getDesiredCourse(@RequestParam String studentId) {
+        List<Schedule> desiredCourse = desiredCourseService.getDesiredCourse(studentId);
+
+        return ResponseEntity.status(HttpStatus.FOUND).body(desiredCourse);
     }
 
 }
