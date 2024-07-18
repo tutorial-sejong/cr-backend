@@ -16,7 +16,7 @@ public class Schedule {
     private String curiNo;
 
     @Id
-    @Column(name = "class")
+    @Column(name = "class_no")
     private String classNo;
 
     @Column(name = "sch_college_alias")

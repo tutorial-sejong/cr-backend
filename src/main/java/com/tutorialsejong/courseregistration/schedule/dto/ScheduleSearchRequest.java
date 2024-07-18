@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record ScheduleSearchRequest(
         String schCollegeAlias,
         String schDeptAlias,
-
         String curiTypeCdNm,
         String sltDomainCdNm,
         String curiNm,

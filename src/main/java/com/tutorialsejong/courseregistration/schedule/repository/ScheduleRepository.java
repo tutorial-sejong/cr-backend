@@ -1,11 +1,13 @@
 package com.tutorialsejong.courseregistration.schedule.repository;
 
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.schedule.entity.ScheduleId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
 
@@ -24,4 +26,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
             @Param("curi_nm") String curiNm,
             @Param("lesn_emp") String lesnEmp
     );
+
 }

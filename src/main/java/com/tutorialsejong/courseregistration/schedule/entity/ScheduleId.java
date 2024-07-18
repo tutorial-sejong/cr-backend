@@ -8,7 +8,13 @@ public class ScheduleId implements Serializable {
     private String curiNo;
     private String classNo;
 
-    public ScheduleId() {}
+    public ScheduleId() {
+    }
+
+    public ScheduleId(String curiNo, String classNo) {
+        this.curiNo = curiNo;
+        this.classNo = classNo;
+    }
 
     public ScheduleId(String schDeptAlias, String curiNo, String classNo) {
         this.schDeptAlias = schDeptAlias;
@@ -32,15 +38,14 @@ public class ScheduleId implements Serializable {
         this.curiNo = curiNo;
     }
 
-    public String getCLASS() {
+    public String getClassNo() {
         return classNo;
     }
 
-    public void setCLASS(String CLASS) {
+    public void setClassNo(String CLASS) {
         this.classNo = CLASS;
     }
 
-    // equals and hashCode methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
