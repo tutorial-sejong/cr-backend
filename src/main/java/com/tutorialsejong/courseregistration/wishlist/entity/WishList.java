@@ -1,53 +1,48 @@
 package com.tutorialsejong.courseregistration.wishlist.entity;
 
+import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "wish_list")
-@IdClass(WishListId.class)
 public class WishList {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long wishListId;
+
     @ManyToOne
     @JoinColumn(name = "student_id", referencedColumnName = "studentId")
     private User studentId;
 
-    @Id
-    @Column(name = "curi_no")
-    private String curiNo;
+    @ManyToOne
+    @JoinColumn(name = "schedule_id", referencedColumnName = "scheduleId")
+    private Schedule scheduleId;
 
-    @Id
-    @Column(name = "class_no")
-    private String classNo;
-
-    @Column(name = "curi_nm")
-    private String curiNm;
-
-    public WishList(User studentId, String curiNo, String classNo, String curiNm) {
-        this.studentId = studentId;
-        this.curiNo = curiNo;
-        this.classNo = classNo;
-        this.curiNm = curiNm;
-    }
 
     public WishList() {
 
+    }
+
+    public WishList(User studentId, Schedule scheduleId) {
+        this.studentId = studentId;
+        this.scheduleId = scheduleId;
     }
 
     public User getStudentId() {
         return studentId;
     }
 
-    public String getCuriNo() {
-        return curiNo;
+    public void setStudentId(User studentId) {
+        this.studentId = studentId;
     }
 
-    public String getClassNo() {
-        return classNo;
+    public Schedule getScheduleId() {
+        return scheduleId;
     }
 
-    public String getCuriNm() {
-        return curiNm;
+    public void setScheduleId(Schedule scheduleId) {
+        this.scheduleId = scheduleId;
     }
 }

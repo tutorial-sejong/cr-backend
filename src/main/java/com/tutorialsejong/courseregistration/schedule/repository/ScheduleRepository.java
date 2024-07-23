@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ScheduleRepository extends JpaRepository<Schedule, String> {
+public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query("SELECT s FROM Schedule s WHERE " +
             "(:sch_college_alias IS NULL OR s.schCollegeAlias = :sch_college_alias) AND " +
@@ -25,5 +25,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
             @Param("lesn_emp") String lesnEmp
     );
 
-    List<Schedule> findByCuriNoAndClassNo(String curiNo, String classNo);
+
 }

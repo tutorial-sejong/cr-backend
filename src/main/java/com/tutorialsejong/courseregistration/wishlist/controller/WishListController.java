@@ -24,7 +24,7 @@ public class WishListController {
 
     @PostMapping("/save")
     public ResponseEntity<?> saveWishList(@RequestBody WishListRequest wishListRequest) {
-        wishListService.saveWishList(wishListRequest.studentId(), wishListRequest.wishListList());
+        wishListService.saveWishList(wishListRequest.studentId(), wishListRequest.wishListIdList());
 
         return ResponseEntity.status(HttpStatus.CREATED).body("관심과목이 저장되었습니다.");
     }

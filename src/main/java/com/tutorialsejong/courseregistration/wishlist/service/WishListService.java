@@ -1,13 +1,12 @@
 package com.tutorialsejong.courseregistration.wishlist.service;
 
-import com.tutorialsejong.courseregistration.wishlist.dto.CourseInformation;
-import com.tutorialsejong.courseregistration.wishlist.entity.WishList;
-import com.tutorialsejong.courseregistration.wishlist.repository.WishListRepository;
 import com.tutorialsejong.courseregistration.exception.CheckUserException;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
+import com.tutorialsejong.courseregistration.wishlist.entity.WishList;
+import com.tutorialsejong.courseregistration.wishlist.repository.WishListRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,13 +25,12 @@ public class WishListService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public void saveWishList(String studentId, List<CourseInformation> wishListList) {
-
+    public void saveWishList(String studentId, List<Long> wishListIdList) {
         User user = checkExistUser(studentId);
 
-        List<WishList> wishList = wishListList
-                .stream()
-                .map(request -> new WishList(user, request.curiNo(), request.classNo(), request.curiNm()))
+        List<WishList> wishList = wishListIdList.stream()
+                .map(this::checkExistSchedule)
+                .map(schedule -> new WishList(user, schedule))
                 .collect(Collectors.toList());
 
         wishListRepository.saveAll(wishList);
@@ -44,13 +42,17 @@ public class WishListService {
         List<WishList> wishListList = wishListRepository.findAllByStudentId(user);
 
         return wishListList.stream()
-                .map(item -> scheduleRepository.findByCuriNoAndClassNo(item.getCuriNo(), item.getClassNo()))
-                .flatMap(List::stream)
+                .map(WishList::getScheduleId)
                 .collect(Collectors.toList());
     }
 
     public User checkExistUser(String studentId) {
         return userRepository.findById(studentId)
                 .orElseThrow(() -> new CheckUserException(studentId + "회원이 존재하지 않습니다."));
+    }
+
+    public Schedule checkExistSchedule(Long scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new CheckUserException(scheduleId + "과목이 존재하지않습니다."));
     }
 }

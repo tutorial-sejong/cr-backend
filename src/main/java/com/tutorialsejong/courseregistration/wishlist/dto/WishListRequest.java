@@ -5,6 +5,6 @@ import java.util.List;
 
 public record WishListRequest(
         String studentId,
-        List<CourseInformation> wishListList
+        List<Long> wishListIdList
 ) {
 }
