@@ -56,4 +56,5 @@ jobs:
             fi
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl restart tutorial_sejong_backend
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl status tutorial_sejong_backend
+            mysql -u ${{ secrets.MARIADB_ID }} -p${{ secrets.MARIADB_PASSWORD }} < /home/anhye0n/web/tutorial_sejong/backend/tutorial_sejong.sql
           EOF
