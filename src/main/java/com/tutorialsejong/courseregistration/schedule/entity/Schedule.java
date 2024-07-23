@@ -4,19 +4,19 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "course_schedule")
-@IdClass(ScheduleId.class)
 public class Schedule {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long scheduleId;
+
     @Column(name = "sch_dept_alias")
     private String schDeptAlias;
 
-    @Id
     @Column(name = "curi_no")
     private String curiNo;
 
-    @Id
-    @Column(name = "class")
+    @Column(name = "class_no")
     private String classNo;
 
     @Column(name = "sch_college_alias")

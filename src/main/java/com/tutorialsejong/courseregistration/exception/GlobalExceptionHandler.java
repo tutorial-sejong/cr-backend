@@ -1,11 +1,13 @@
 package com.tutorialsejong.courseregistration.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -55,6 +57,12 @@ public class GlobalExceptionHandler {
             body.put("message", Collections.singletonList("유효하지 않은 토큰입니다."));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
+    @ExceptionHandler(CheckUserException.class)
+    public ResponseEntity<?> handleCheckUserException(CheckUserException ex) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
