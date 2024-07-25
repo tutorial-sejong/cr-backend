@@ -47,7 +47,7 @@ public class WishListService {
     }
 
     public User checkExistUser(String studentId) {
-        return userRepository.findById(studentId)
+        return userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CheckUserException(studentId + "회원이 존재하지 않습니다."));
     }
 

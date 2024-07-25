@@ -65,6 +65,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(AlreadyRegisteredException.class)
+    public ResponseEntity<?> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CourseNotRegisteredException.class)
+    public ResponseEntity<?> handleCourseNotRegisteredException(CourseNotRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGenericException(Exception ex) {
         Map<String, Object> body = new HashMap<>();
