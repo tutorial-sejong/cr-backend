@@ -67,6 +67,10 @@ public class Schedule {
     @Column(name = "remark")
     private String remark;
 
+    public Long getScheduleId() {
+        return scheduleId;
+    }
+
     public String getSchDeptAlias() {
         return schDeptAlias;
     }
