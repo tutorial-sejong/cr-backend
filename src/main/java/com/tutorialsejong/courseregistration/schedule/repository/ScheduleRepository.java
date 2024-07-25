@@ -1,4 +1,4 @@
-package com.tutorialsejong.courseregistration.schedule;
+package com.tutorialsejong.courseregistration.schedule.repository;
 
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ScheduleRepository extends JpaRepository<Schedule, String> {
+public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query("SELECT s FROM Schedule s WHERE " +
             "(:sch_college_alias IS NULL OR s.schCollegeAlias = :sch_college_alias) AND " +
@@ -24,4 +24,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
             @Param("curi_nm") String curiNm,
             @Param("lesn_emp") String lesnEmp
     );
+
+
 }

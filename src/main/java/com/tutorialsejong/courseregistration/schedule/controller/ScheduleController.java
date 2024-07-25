@@ -1,5 +1,6 @@
-package com.tutorialsejong.courseregistration.schedule;
+package com.tutorialsejong.courseregistration.schedule.controller;
 
+import com.tutorialsejong.courseregistration.schedule.service.ScheduleService;
 import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.schedule.dto.ErrorDto;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
