@@ -10,8 +10,8 @@ import java.util.List;
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     @Query("SELECT s FROM Schedule s WHERE " +
-            "(:sch_college_alias IS NULL OR s.curiNo = :curi_no) AND " +
-            "(:sch_college_alias IS NULL OR s.classNo = :class_no) AND " +
+            "(:curi_no IS NULL OR s.curiNo = :curi_no) AND " +
+            "(:class_no IS NULL OR s.classNo = :class_no) AND " +
             "(:sch_college_alias IS NULL OR s.schCollegeAlias = :sch_college_alias) AND " +
             "(:sch_dept_alias IS NULL OR s.schDeptAlias = :sch_dept_alias) AND " +
             "(:curi_type_cd_nm IS NULL OR s.curiTypeCdNm = :curi_type_cd_nm) AND " +
