@@ -1,7 +1,8 @@
 package com.tutorialsejong.courseregistration.auth.controller;
 
-import com.tutorialsejong.courseregistration.auth.dto.JwtResponseDTO;
-import com.tutorialsejong.courseregistration.auth.dto.LoginRequestDTO;
+import com.tutorialsejong.courseregistration.auth.dto.JwtTokens;
+import com.tutorialsejong.courseregistration.auth.dto.LoginRequest;
+import com.tutorialsejong.courseregistration.auth.dto.LoginResponse;
 import com.tutorialsejong.courseregistration.auth.dto.MacroResponse;
 import com.tutorialsejong.courseregistration.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -27,23 +28,18 @@ public class AuthController {
     );
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequest) {
-        JwtResponseDTO jwtResponse = authService.loginOrSignup(loginRequest);
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("accessToken", jwtResponse.accessToken());
-        body.put("refreshToken", jwtResponse.refreshToken());
-
-        return ResponseEntity.ok(body);
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
+        LoginResponse loginResponse = authService.loginOrSignup(loginRequest);
+        return ResponseEntity.ok(loginResponse);
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
-        JwtResponseDTO jwtResponse = authService.refreshAccessToken(refreshToken);
+        JwtTokens jwtTokens = authService.refreshAccessToken(refreshToken);
 
         Map<String, Object> body = new HashMap<>();
-        body.put("accessToken", jwtResponse.accessToken());
+        body.put("accessToken", jwtTokens.accessToken());
 
         return ResponseEntity.ok(body);
     }
