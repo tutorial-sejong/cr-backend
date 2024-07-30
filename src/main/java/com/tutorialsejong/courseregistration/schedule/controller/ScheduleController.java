@@ -30,11 +30,13 @@ public class ScheduleController {
     }
 
     private static final Set<String> ALLOWED_PARAMS = Set.of(
-            "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm", "lesnEmp"
+            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm", "lesnEmp"
     );
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getSearchSchedules(
+            @RequestParam(required = false) String curiNo,
+            @RequestParam(required = false) String classNo,
             @RequestParam(required = false) String schCollegeAlias,
             @RequestParam(required = false) String schDeptAlias,
             @RequestParam(required = false) String curiTypeCdNm,
@@ -54,7 +56,7 @@ public class ScheduleController {
                     .body(new ErrorDto(new Date(), 400, message, request.getDescription(false)));
         }
 
-        List<Schedule> searchResult = scheduleService.getSearchResultSchedules(new ScheduleSearchRequest(schCollegeAlias, schDeptAlias, curiTypeCdNm, sltDomainCdNm, curiNm, lesnEmp));
+        List<Schedule> searchResult = scheduleService.getSearchResultSchedules(new ScheduleSearchRequest(curiNo, classNo, schCollegeAlias, schDeptAlias, curiTypeCdNm, sltDomainCdNm, curiNm, lesnEmp));
 
         if (searchResult.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(new Date(), 404, "검색된 값 없음", request.getDescription(false)));
