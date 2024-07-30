@@ -25,7 +25,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void whenValidLogin_thenReturnsToken() {
+    public void whenValidLogin_thenReturnsTokenAndSetsCookie() {
         Map<String, String> loginRequest = new HashMap<>();
         loginRequest.put("studentId", "230000000");
         loginRequest.put("password", "password123");
@@ -40,7 +40,8 @@ public class AuthControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(200);
         assertThat(response.jsonPath().getString("accessToken")).isNotBlank();
-        assertThat(response.jsonPath().getString("refreshToken")).isNotBlank();
+        assertThat(response.getCookie("refreshToken")).isNotNull();
+        assertThat(response.jsonPath().getString("refreshToken")).isNull(); // refreshToken should not be in the response body
     }
 
     @Test
@@ -101,14 +102,10 @@ public class AuthControllerTest {
                 .then()
                 .extract().response();
 
-        String refreshToken = loginResponse.jsonPath().getString("refreshToken");
-
-        Map<String, String> refreshRequest = new HashMap<>();
-        refreshRequest.put("refreshToken", refreshToken);
+        String refreshToken = loginResponse.getCookie("refreshToken");
 
         Response refreshResponse = given()
-                .contentType(ContentType.JSON)
-                .body(refreshRequest)
+                .cookie("refreshToken", refreshToken)
                 .when()
                 .post("/api/auth/refresh")
                 .then()
@@ -120,12 +117,8 @@ public class AuthControllerTest {
 
     @Test
     public void whenInvalidRefreshToken_thenReturnsUnauthorized() {
-        Map<String, String> refreshRequest = new HashMap<>();
-        refreshRequest.put("refreshToken", "invalidRefreshToken");
-
         Response response = given()
-                .contentType(ContentType.JSON)
-                .body(refreshRequest)
+                .cookie("refreshToken", "invalidRefreshToken")
                 .when()
                 .post("/api/auth/refresh")
                 .then()

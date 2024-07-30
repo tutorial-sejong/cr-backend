@@ -1,9 +1,9 @@
 package com.tutorialsejong.courseregistration.auth.service;
 
 import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.auth.dto.AuthenticationResult;
 import com.tutorialsejong.courseregistration.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.auth.dto.LoginRequest;
-import com.tutorialsejong.courseregistration.auth.dto.LoginResponse;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.InvalidRefreshTokenException;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
@@ -36,11 +36,11 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public LoginResponse loginOrSignup(LoginRequest loginRequest) {
+    public AuthenticationResult loginOrSignup(LoginRequest loginRequest) {
         User user = findOrCreateUser(loginRequest);
         Authentication authentication = authenticate(loginRequest);
         JwtTokens jwtTokens = generateTokens(authentication, user);
-        return new LoginResponse(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
+        return new AuthenticationResult(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
     }
 
     private User findOrCreateUser(LoginRequest loginRequest) {
