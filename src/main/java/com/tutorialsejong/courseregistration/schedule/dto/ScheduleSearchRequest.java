@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ScheduleSearchRequest(
+        String curiNo,
+        String classNo,
         String schCollegeAlias,
         String schDeptAlias,
         String curiTypeCdNm,

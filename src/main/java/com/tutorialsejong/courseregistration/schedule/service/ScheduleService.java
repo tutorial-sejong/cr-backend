@@ -24,6 +24,8 @@ public class ScheduleService {
 
     public List<Schedule> getSearchResultSchedules(ScheduleSearchRequest scheduleSearchRequest) {
         List<Schedule> findAllByResult = scheduleRepository.findAllBy(
+                scheduleSearchRequest.curiNo(),
+                scheduleSearchRequest.classNo(),
                 scheduleSearchRequest.schCollegeAlias(),
                 scheduleSearchRequest.schDeptAlias(),
                 scheduleSearchRequest.curiTypeCdNm(),
