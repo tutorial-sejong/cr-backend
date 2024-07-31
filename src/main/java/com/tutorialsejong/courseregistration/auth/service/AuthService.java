@@ -86,7 +86,7 @@ public class AuthService {
     }
 
     private Authentication getAuthenticationFromRefreshToken(String refreshToken) {
-        return tokenProvider.getAuthenticationToken(refreshToken, false);
+        return tokenProvider.getAuthentication(refreshToken);
     }
 
     private User getUserFromAuthentication(Authentication authentication) {

@@ -1,16 +1,9 @@
 package com.tutorialsejong.courseregistration.schedule.controller;
 
-import com.tutorialsejong.courseregistration.schedule.dto.ErrorDto;
-import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
-import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.service.ScheduleService;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
+import com.tutorialsejong.courseregistration.schedule.dto.ErrorDto;
+import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/schedules")
@@ -40,8 +37,9 @@ public class ScheduleController {
     public ResponseEntity<?> getSearchSchedules(ScheduleSearchRequest searchRequest, WebRequest request, @RequestParam String studentId) {
         Set<String> invalidParams = validateParameters(request);
         if (!invalidParams.isEmpty()) {
-            return createErrorResponse(HttpStatus.BAD_REQUEST,
-                    "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")", request);
+            String message = "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorDto(new Date(), 400, message, request.getDescription(false)));
         }
 
         List<Schedule> searchResult = scheduleService.getSearchResultSchedules(searchRequest, studentId);

@@ -1,6 +1,6 @@
 package com.tutorialsejong.courseregistration.wishlist.service;
 
-import com.tutorialsejong.courseregistration.exception.CheckUserException;
+import com.tutorialsejong.courseregistration.common.exception.CheckUserException;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.user.entity.User;
