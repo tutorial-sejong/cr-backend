@@ -12,4 +12,7 @@ public interface WishListRepository extends JpaRepository<WishList, String> {
     List<WishList> findAllByStudentId(User studentId);
 
     Optional<WishList> findByStudentIdAndScheduleId(User user, Schedule schedule);
+
+    boolean existsByStudentIdAndScheduleId(User studentId, Schedule scheduleId);
+
 }
