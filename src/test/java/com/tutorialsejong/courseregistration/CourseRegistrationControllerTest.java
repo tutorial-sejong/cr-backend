@@ -3,8 +3,8 @@ package com.tutorialsejong.courseregistration;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
+import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -87,17 +87,16 @@ public class CourseRegistrationControllerTest {
 
     @Test
     public void whenGetRegisteredCourses_thenReturnsOkAndCorrectSize() {
-        Long scheduleId = 1L;
+        Long scheduleId1 = 1L;
+        Long scheduleId2 = 2L;
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/registrations/" + scheduleId);
-
-        scheduleId = 2L;
+                .post("/registrations/" + scheduleId1);
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/registrations/" + scheduleId);
+                .post("/registrations/" + scheduleId2);
 
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
@@ -108,7 +107,7 @@ public class CourseRegistrationControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
 
-        List<CourseRegistrationResponse> registrations = response.jsonPath().getList("", CourseRegistrationResponse.class);
+        List<Schedule> registrations = response.jsonPath().getList("", Schedule.class);
         assertThat(registrations).hasSize(2);
         assertThat(registrations).extracting("scheduleId").containsExactlyInAnyOrder(1L, 2L);
     }

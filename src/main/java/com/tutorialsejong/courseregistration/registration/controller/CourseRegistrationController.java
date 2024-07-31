@@ -3,6 +3,7 @@ package com.tutorialsejong.courseregistration.registration.controller;
 
 import com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.registration.service.CourseRegistrationService;
+import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,10 +36,9 @@ public class CourseRegistrationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseRegistrationResponse>> getRegisteredCourses(
+    public ResponseEntity<List<Schedule>> getRegisteredCourses(
             @AuthenticationPrincipal UserDetails userDetails) {
-        List<CourseRegistrationResponse> registrations = courseRegistrationService.getRegisteredCourses(
-                userDetails.getUsername());
+        List<Schedule> registrations = courseRegistrationService.getRegisteredCourses(userDetails.getUsername());
         if (registrations.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
