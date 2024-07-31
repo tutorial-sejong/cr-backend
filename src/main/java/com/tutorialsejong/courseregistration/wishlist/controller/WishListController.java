@@ -33,7 +33,12 @@ public class WishListController {
     public ResponseEntity<?> getWishList(@RequestParam String studentId) {
         List<Schedule> wishList = wishListService.getWishList(studentId);
 
-        return ResponseEntity.status(HttpStatus.FOUND).body(wishList);
+        return ResponseEntity.status(HttpStatus.OK).body(wishList);
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteWishList(@RequestParam String studentId, @RequestParam Long scheduleId) {
+        wishListService.deleteWishList(studentId, scheduleId);
+        return ResponseEntity.status(HttpStatus.OK).body("관심과목이 삭제되었습니다.");
+    }
 }

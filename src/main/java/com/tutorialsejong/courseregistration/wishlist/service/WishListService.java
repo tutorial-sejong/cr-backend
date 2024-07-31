@@ -30,8 +30,13 @@ public class WishListService {
 
         List<WishList> wishList = wishListIdList.stream()
                 .map(this::checkExistSchedule)
+                .filter(schedule -> !wishListRepository.existsByStudentIdAndScheduleId(user, schedule)) // 이미 등록된 관심과목 제외
                 .map(schedule -> new WishList(user, schedule))
                 .collect(Collectors.toList());
+
+        if (wishList.isEmpty()) {
+            new CheckUserException("이미 신청된 관심과목이 포함되어있습니다.");
+        }
 
         wishListRepository.saveAll(wishList);
     }
@@ -54,5 +59,15 @@ public class WishListService {
     public Schedule checkExistSchedule(Long scheduleId) {
         return scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new CheckUserException(scheduleId + "과목이 존재하지않습니다."));
+    }
+
+    public void deleteWishList(String studentId, Long scheduleId) {
+        User user = checkExistUser(studentId);
+        Schedule schedule = checkExistSchedule(scheduleId);
+
+        WishList wishList = wishListRepository.findByStudentIdAndScheduleId(user, schedule)
+                .orElseThrow(() -> new CheckUserException("신청하지 않은 과목입니다."));
+
+        wishListRepository.delete(wishList);
     }
 }

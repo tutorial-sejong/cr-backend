@@ -1,8 +1,9 @@
 package com.tutorialsejong.courseregistration.auth.service;
 
 import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
-import com.tutorialsejong.courseregistration.auth.dto.JwtResponseDTO;
-import com.tutorialsejong.courseregistration.auth.dto.LoginRequestDTO;
+import com.tutorialsejong.courseregistration.auth.dto.AuthenticationResult;
+import com.tutorialsejong.courseregistration.auth.dto.JwtTokens;
+import com.tutorialsejong.courseregistration.auth.dto.LoginRequest;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.InvalidRefreshTokenException;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
@@ -35,18 +36,19 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public JwtResponseDTO loginOrSignup(LoginRequestDTO loginRequest) {
+    public AuthenticationResult loginOrSignup(LoginRequest loginRequest) {
         User user = findOrCreateUser(loginRequest);
         Authentication authentication = authenticate(loginRequest);
-        return generateTokens(authentication, user);
+        JwtTokens jwtTokens = generateTokens(authentication, user);
+        return new AuthenticationResult(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
     }
 
-    private User findOrCreateUser(LoginRequestDTO loginRequest) {
+    private User findOrCreateUser(LoginRequest loginRequest) {
         return userRepository.findByStudentId(loginRequest.studentId())
                 .orElseGet(() -> createNewUser(loginRequest));
     }
 
-    private User createNewUser(LoginRequestDTO loginRequest) {
+    private User createNewUser(LoginRequest loginRequest) {
         User newUser = new User(loginRequest.studentId(), encodePassword(loginRequest.password()));
         return userRepository.save(newUser);
     }
@@ -55,7 +57,7 @@ public class AuthService {
         return passwordEncoder.encode(password);
     }
 
-    private Authentication authenticate(LoginRequestDTO loginRequest) {
+    private Authentication authenticate(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.studentId(),
@@ -66,17 +68,17 @@ public class AuthService {
         return authentication;
     }
 
-    private JwtResponseDTO generateTokens(Authentication authentication, User user) {
+    private JwtTokens generateTokens(Authentication authentication, User user) {
         String accessToken = tokenProvider.generateAccessToken(authentication);
         String refreshToken = tokenProvider.generateRefreshToken(authentication);
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
-        return new JwtResponseDTO(accessToken, refreshToken);
+        return new JwtTokens(accessToken, refreshToken);
     }
 
-    public JwtResponseDTO refreshAccessToken(String refreshToken) {
+    public JwtTokens refreshAccessToken(String refreshToken) {
         Authentication authentication = getAuthenticationFromRefreshToken(refreshToken);
         User user = getUserFromAuthentication(authentication);
         verifyRefreshTokenOwnership(user, refreshToken);
@@ -98,13 +100,13 @@ public class AuthService {
         }
     }
 
-    private JwtResponseDTO generateNewAccessToken(User user, Authentication authentication) {
+    private JwtTokens generateNewAccessToken(User user, Authentication authentication) {
         List<GrantedAuthority> authorities = authentication.getAuthorities().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                 .collect(Collectors.toList());
         Authentication newAuthentication = new UsernamePasswordAuthenticationToken(user.getStudentId(), null, authorities);
 
         String newAccessToken = tokenProvider.generateAccessToken(newAuthentication);
-        return new JwtResponseDTO(newAccessToken, user.getRefreshToken());
+        return new JwtTokens(newAccessToken, user.getRefreshToken());
     }
 }
