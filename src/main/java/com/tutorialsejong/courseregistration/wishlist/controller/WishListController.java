@@ -33,7 +33,7 @@ public class WishListController {
     public ResponseEntity<?> getWishList(@RequestParam String studentId) {
         List<Schedule> wishList = wishListService.getWishList(studentId);
 
-        return ResponseEntity.status(HttpStatus.FOUND).body(wishList);
+        return ResponseEntity.status(HttpStatus.OK).body(wishList);
     }
 
 }
