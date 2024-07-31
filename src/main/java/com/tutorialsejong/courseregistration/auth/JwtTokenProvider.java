@@ -56,7 +56,15 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateAccessTokenFromUsername(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
+
+        return generateToken(username, accessTokenExpirationInMs);
+    }
+
     public String getUsernameFromJWT(String token) {
+        validateToken(token);
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
