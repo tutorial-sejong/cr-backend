@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +27,7 @@ import org.springframework.web.context.request.WebRequest;
 public class ScheduleController {
 
     private static final Set<String> ALLOWED_PARAMS = Set.of(
-            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm", "lesnEmp"
+            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm", "lesnEmp", "studentId"
     );
 
     private final ScheduleService scheduleService;
@@ -36,14 +38,18 @@ public class ScheduleController {
     }
 
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSearchSchedules(ScheduleSearchRequest searchRequest, WebRequest request) {
+    public ResponseEntity<?> getSearchSchedules(ScheduleSearchRequest searchRequest,
+                                                WebRequest request,
+                                                @AuthenticationPrincipal UserDetails userDetails) {
         Set<String> invalidParams = validateParameters(request);
         if (!invalidParams.isEmpty()) {
-            return createErrorResponse(HttpStatus.BAD_REQUEST,
-                    "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")", request);
+            String message = "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorDto(new Date(), 400, message, request.getDescription(false)));
         }
 
-        List<Schedule> searchResult = scheduleService.getSearchResultSchedules(searchRequest);
+        String studentId = userDetails.getUsername();
+        List<Schedule> searchResult = scheduleService.getSearchResultSchedules(searchRequest, studentId);
 
         if (searchResult.isEmpty()) {
             return createErrorResponse(HttpStatus.NOT_FOUND, "검색된 값 없음", request);

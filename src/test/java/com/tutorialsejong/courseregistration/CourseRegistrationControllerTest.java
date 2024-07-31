@@ -3,6 +3,7 @@ package com.tutorialsejong.courseregistration;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -26,6 +27,7 @@ public class CourseRegistrationControllerTest {
     private int port;
 
     private String accessToken;
+
     @Autowired
     private CourseRegistrationRepository courseRegistrationRepository;
 
@@ -56,7 +58,7 @@ public class CourseRegistrationControllerTest {
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId)
+                .post("/registrations/" + scheduleId)
                 .then()
                 .extract().response();
 
@@ -70,13 +72,13 @@ public class CourseRegistrationControllerTest {
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId);
+                .post("/registrations/" + scheduleId);
 
         // 두 번째 등록 시도
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId)
+                .post("/registrations/" + scheduleId)
                 .then()
                 .extract().response();
 
@@ -89,26 +91,26 @@ public class CourseRegistrationControllerTest {
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId);
+                .post("/registrations/" + scheduleId);
 
         scheduleId = 2L;
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId);
+                .post("/registrations/" + scheduleId);
 
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .get("/api/course-registration/list")
+                .get("/registrations")
                 .then()
                 .extract().response();
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
 
-        List<Long> scheduleIds = response.jsonPath().getList("", Long.class);
-        assertThat(scheduleIds).hasSize(2);
-        assertThat(scheduleIds).containsExactlyInAnyOrder(1L, 2L);
+        List<CourseRegistrationResponse> registrations = response.jsonPath().getList("", CourseRegistrationResponse.class);
+        assertThat(registrations).hasSize(2);
+        assertThat(registrations).extracting("scheduleId").containsExactlyInAnyOrder(1L, 2L);
     }
 
     @Test
@@ -116,7 +118,7 @@ public class CourseRegistrationControllerTest {
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .get("/api/course-registration/list")
+                .get("/registrations")
                 .then()
                 .extract().response();
 
@@ -134,7 +136,7 @@ public class CourseRegistrationControllerTest {
         given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .post("/api/course-registration/register/" + scheduleId)
+                .post("/registrations/" + scheduleId)
                 .then()
                 .extract().response();
 
@@ -142,7 +144,7 @@ public class CourseRegistrationControllerTest {
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .delete("/api/course-registration/cancel/" + scheduleId)
+                .delete("/registrations/" + scheduleId)
                 .then()
                 .extract().response();
 
@@ -156,7 +158,7 @@ public class CourseRegistrationControllerTest {
         Response response = given()
                 .header("Authorization", "Bearer " + accessToken)
                 .when()
-                .delete("/api/course-registration/cancel/" + notRegisteredScheduleId)
+                .delete("/registrations/" + notRegisteredScheduleId)
                 .then()
                 .extract().response();
 

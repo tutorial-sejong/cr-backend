@@ -39,4 +39,20 @@ public class CourseRegistration {
     public CourseRegistration() {
 
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public User getStudent() {
+        return student;
+    }
+
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
 }

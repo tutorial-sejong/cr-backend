@@ -65,14 +65,9 @@ public class AuthController {
         }
 
         JwtTokens jwtTokens = authService.refreshAccessToken(refreshToken);
-        ResponseCookie newRefreshTokenCookie = createRefreshTokenCookie(jwtTokens.refreshToken());
-
         Map<String, Object> body = new HashMap<>();
         body.put("accessToken", jwtTokens.accessToken());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, newRefreshTokenCookie.toString())
-                .body(body);
+        return ResponseEntity.ok().body(body);
     }
 
     @GetMapping("/macro")

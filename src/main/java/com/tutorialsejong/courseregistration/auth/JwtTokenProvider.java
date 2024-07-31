@@ -1,86 +1,98 @@
 package com.tutorialsejong.courseregistration.auth;
 
-import com.tutorialsejong.courseregistration.exception.JwtAuthenticationException;
+import com.tutorialsejong.courseregistration.auth.service.CustomUserDetailsService;
+import com.tutorialsejong.courseregistration.common.exception.JwtAuthenticationException;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
-    private final Key accessTokenSecret;
-    private final Key refreshTokenSecret;
+    private final Key key;
     private final int accessTokenExpirationInMs;
     private final int refreshTokenExpirationInMs;
+    private final CustomUserDetailsService customUserDetailsService;
 
     public JwtTokenProvider(
-            @Value("${app.jwt.accessTokenSecret}") String accessTokenSecret,
-            @Value("${app.jwt.refreshTokenSecret}") String refreshTokenSecret,
+            @Value("${app.jwt.secret}") String jwtSecret,
             @Value("${app.jwt.accessTokenExpirationInMs}") int accessTokenExpirationInMs,
-            @Value("${app.jwt.refreshTokenExpirationInMs}") int refreshTokenExpirationInMs) {
-        this.accessTokenSecret = Keys.hmacShaKeyFor(accessTokenSecret.getBytes());
-        this.refreshTokenSecret = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes());
+            @Value("${app.jwt.refreshTokenExpirationInMs}") int refreshTokenExpirationInMs,
+            CustomUserDetailsService customUserDetailsService) {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.accessTokenExpirationInMs = accessTokenExpirationInMs;
         this.refreshTokenExpirationInMs = refreshTokenExpirationInMs;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     public String generateAccessToken(Authentication authentication) {
-        return generateToken(authentication, accessTokenSecret, accessTokenExpirationInMs);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return generateToken(userDetails.getUsername(), accessTokenExpirationInMs);
     }
 
     public String generateRefreshToken(Authentication authentication) {
-        return generateToken(authentication, refreshTokenSecret, refreshTokenExpirationInMs);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return generateToken(userDetails.getUsername(), refreshTokenExpirationInMs);
     }
 
-    private String generateToken(Authentication authentication, Key secret, int expirationInMs) {
-        String username = authentication.getName();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+    private String generateToken(String username, int expirationInMs) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationInMs);
 
         return Jwts.builder()
                 .setSubject(username)
-                .claim("authorities", authorities.stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList()))
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(secret)
+                .signWith(key)
                 .compact();
     }
 
-    public Authentication getAuthenticationToken(String token, boolean isAccessToken) {
-        Claims claims = validateAndParseToken(token, isAccessToken);
-        String username = claims.getSubject();
-        List<String> authorities = claims.get("authorities", List.class);
+    public String generateAccessTokenFromUsername(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
 
-        Collection<? extends GrantedAuthority> grantedAuthorities = authorities.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
+        return generateToken(username, accessTokenExpirationInMs);
     }
 
-    private Claims validateAndParseToken(String token, boolean isAccessToken) {
+    public String getUsernameFromJWT(String token) {
+        validateToken(token);
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
+    public void validateToken(String authToken) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(isAccessToken ? accessTokenSecret : refreshTokenSecret)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (JwtException e) {
-            throw new JwtAuthenticationException("Invalid JWT token", e);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+        } catch (MalformedJwtException | UnsupportedJwtException ex) {
+            throw new JwtAuthenticationException("Invalid JWT token", ex);
+        } catch (ExpiredJwtException ex) {
+            throw new JwtAuthenticationException("Expired JWT token", ex);
+        } catch (IllegalArgumentException ex) {
+            throw new JwtAuthenticationException("JWT claims string is empty", ex);
         }
+    }
+
+    public Authentication getAuthentication(String token) {
+        String username = getUsernameFromJWT(token);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    public int getRefreshTokenExpirationInSeconds() {
+        return refreshTokenExpirationInMs / 1000;
     }
 }

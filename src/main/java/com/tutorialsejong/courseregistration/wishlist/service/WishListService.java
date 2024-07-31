@@ -1,6 +1,6 @@
 package com.tutorialsejong.courseregistration.wishlist.service;
 
-import com.tutorialsejong.courseregistration.exception.CheckUserException;
+import com.tutorialsejong.courseregistration.common.exception.CheckUserException;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.user.entity.User;
@@ -30,8 +30,13 @@ public class WishListService {
 
         List<WishList> wishList = wishListIdList.stream()
                 .map(this::checkExistSchedule)
+                .filter(schedule -> !wishListRepository.existsByStudentIdAndScheduleId(user, schedule)) // 이미 등록된 관심과목 제외
                 .map(schedule -> new WishList(user, schedule))
                 .collect(Collectors.toList());
+
+        if (wishList.isEmpty()) {
+            new CheckUserException("이미 신청된 관심과목이 포함되어있습니다.");
+        }
 
         wishListRepository.saveAll(wishList);
     }
