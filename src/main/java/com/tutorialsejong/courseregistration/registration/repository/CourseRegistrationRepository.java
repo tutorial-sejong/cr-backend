@@ -2,6 +2,7 @@ package com.tutorialsejong.courseregistration.registration.repository;
 
 import com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.registration.entity.CourseRegistration;
+import com.tutorialsejong.courseregistration.user.entity.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,7 @@ public interface CourseRegistrationRepository extends JpaRepository<CourseRegist
 
     Optional<CourseRegistration> findByStudentStudentIdAndScheduleScheduleId(String studentId, Long scheduleId);
 
-    List<CourseRegistration> findByStudentStudentId(String studentId);
+    List<CourseRegistration> findAllByStudent(User student);
 
     @Query("SELECT new com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse(" +
             "cr.student.studentId, cr.schedule.scheduleId) " +
