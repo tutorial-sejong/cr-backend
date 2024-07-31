@@ -30,8 +30,13 @@ public class WishListService {
 
         List<WishList> wishList = wishListIdList.stream()
                 .map(this::checkExistSchedule)
+                .filter(schedule -> !wishListRepository.existsByStudentIdAndScheduleId(user, schedule)) // 이미 등록된 관심과목 제외
                 .map(schedule -> new WishList(user, schedule))
                 .collect(Collectors.toList());
+
+        if (wishList.isEmpty()) {
+            new CheckUserException("이미 신청된 관심과목이 포함되어있습니다.");
+        }
 
         wishListRepository.saveAll(wishList);
     }
