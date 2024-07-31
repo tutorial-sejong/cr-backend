@@ -1,8 +1,8 @@
 package com.tutorialsejong.courseregistration.registration.service;
 
-import com.tutorialsejong.courseregistration.exception.AlreadyRegisteredException;
-import com.tutorialsejong.courseregistration.exception.CheckUserException;
-import com.tutorialsejong.courseregistration.exception.CourseNotRegisteredException;
+import com.tutorialsejong.courseregistration.common.exception.AlreadyRegisteredException;
+import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
+import com.tutorialsejong.courseregistration.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.registration.entity.CourseRegistration;
 import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
@@ -12,9 +12,11 @@ import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CourseRegistrationService {
+
     private final CourseRegistrationRepository courseRegistrationRepository;
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
@@ -27,29 +29,40 @@ public class CourseRegistrationService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public CourseRegistration registerCourse(String studentId, Long scheduleId) {
+    @Transactional
+    public CourseRegistrationResponse registerCourse(String studentId, Long scheduleId) {
         User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CheckUserException("회원이 존재하지 않습니다. " + studentId));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
         Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new CheckUserException("강좌가 존재하지 않습니다. " + scheduleId));
+                .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
 
         if (courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId)) {
-            throw new AlreadyRegisteredException("이미 수강신청한 과목입니다.");
+            throw new AlreadyRegisteredException("Course already registered");
         }
 
         CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
-        return courseRegistrationRepository.save(registration);
+        registration = courseRegistrationRepository.save(registration);
+        return convertToDto(registration);
     }
 
-    public List<Long> getRegisteredCourses(String studentId) {
-        return courseRegistrationRepository.findScheduleIdsByStudentId(studentId);
+    @Transactional(readOnly = true)
+    public List<CourseRegistrationResponse> getRegisteredCourses(String studentId) {
+        return courseRegistrationRepository.findCourseRegistrationResponsesByStudentId(studentId);
     }
 
+    @Transactional
     public void cancelCourseRegistration(String studentId, Long scheduleId) {
         CourseRegistration registration = courseRegistrationRepository
                 .findByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId)
-                .orElseThrow(() -> new CourseNotRegisteredException("수강 신청하지 않은 과목입니다."));
+                .orElseThrow(() -> new NotFoundException("Course registration not found"));
 
         courseRegistrationRepository.delete(registration);
+    }
+
+    private CourseRegistrationResponse convertToDto(CourseRegistration registration) {
+        return new CourseRegistrationResponse(
+                registration.getStudent().getStudentId(),
+                registration.getSchedule().getScheduleId()
+        );
     }
 }

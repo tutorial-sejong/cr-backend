@@ -1,4 +1,4 @@
-package com.tutorialsejong.courseregistration.exception;
+package com.tutorialsejong.courseregistration.common.exception;
 
 public class AlreadyRegisteredException extends RuntimeException {
     public AlreadyRegisteredException(String message) {
