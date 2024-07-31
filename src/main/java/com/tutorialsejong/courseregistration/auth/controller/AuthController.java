@@ -80,7 +80,7 @@ public class AuthController {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .maxAge(Duration.ofMillis(refreshTokenExpirationInMs))
                 .path(COOKIE_PATH)
                 .build();
