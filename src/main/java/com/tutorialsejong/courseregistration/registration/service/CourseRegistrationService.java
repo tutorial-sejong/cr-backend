@@ -11,6 +11,7 @@ import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +47,15 @@ public class CourseRegistrationService {
     }
 
     @Transactional(readOnly = true)
-    public List<CourseRegistrationResponse> getRegisteredCourses(String studentId) {
-        return courseRegistrationRepository.findCourseRegistrationResponsesByStudentId(studentId);
+    public List<Schedule> getRegisteredCourses(String studentId) {
+        User student = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+
+        List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
+
+        return registrations.stream()
+                .map(CourseRegistration::getSchedule)
+                .collect(Collectors.toList());
     }
 
     @Transactional
