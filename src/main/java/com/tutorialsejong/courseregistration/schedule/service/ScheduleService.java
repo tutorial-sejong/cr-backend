@@ -18,10 +18,6 @@ public class ScheduleService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public List<Schedule> getAllSchedules() {
-        return scheduleRepository.findAll();
-    }
-
     public List<Schedule> getSearchResultSchedules(ScheduleSearchRequest scheduleSearchRequest) {
         List<Schedule> findAllByResult = scheduleRepository.findAllBy(
                 scheduleSearchRequest.curiNo(),
