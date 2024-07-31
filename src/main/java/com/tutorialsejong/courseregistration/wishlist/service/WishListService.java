@@ -55,4 +55,14 @@ public class WishListService {
         return scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new CheckUserException(scheduleId + "과목이 존재하지않습니다."));
     }
+
+    public void deleteWishList(String studentId, Long scheduleId) {
+        User user = checkExistUser(studentId);
+        Schedule schedule = checkExistSchedule(scheduleId);
+
+        WishList wishList = wishListRepository.findByStudentIdAndScheduleId(user, schedule)
+                .orElseThrow(() -> new CheckUserException("신청하지 않은 과목입니다."));
+
+        wishListRepository.delete(wishList);
+    }
 }
