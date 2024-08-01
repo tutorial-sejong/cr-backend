@@ -1,5 +1,6 @@
 package com.tutorialsejong.courseregistration.common.config;
 
+import com.tutorialsejong.courseregistration.auth.JwtAuthenticationEntryPoint;
 import com.tutorialsejong.courseregistration.auth.JwtAuthenticationFilter;
 import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
 import java.util.Arrays;
@@ -22,9 +23,11 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     private final JwtTokenProvider tokenProvider;
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    public SecurityConfig(JwtTokenProvider tokenProvider) {
+    public SecurityConfig(JwtTokenProvider tokenProvider,JwtAuthenticationEntryPoint unauthorizedHandler ) {
         this.tokenProvider = tokenProvider;
+        this.unauthorizedHandler = unauthorizedHandler;
     }
 
     @Bean
@@ -38,7 +41,7 @@ public class SecurityConfig {
                 .cors(cors -> cors
                         .configurationSource(request -> {
                             CorsConfiguration config = new CorsConfiguration();
-                            config.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // 변경
+                            config.setAllowedOrigins(Arrays.asList("https://tutorial-sejong.com"));
                             config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                             config.setAllowedHeaders(Arrays.asList("*"));
                             config.setAllowCredentials(true);
@@ -50,10 +53,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/auth/register",
                                 "/api/auth/refresh"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(unauthorizedHandler)
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
