@@ -1,5 +1,6 @@
 package com.tutorialsejong.courseregistration.auth;
 
+import com.tutorialsejong.courseregistration.auth.service.CustomUserDetailsService;
 import com.tutorialsejong.courseregistration.common.exception.JwtAuthenticationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -17,9 +18,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
         this.tokenProvider = tokenProvider;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -49,8 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.error("Could not set user authentication in security context", ex);
             sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing your request");
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {

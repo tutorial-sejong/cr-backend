@@ -3,6 +3,7 @@ package com.tutorialsejong.courseregistration.common.config;
 import com.tutorialsejong.courseregistration.auth.JwtAuthenticationEntryPoint;
 import com.tutorialsejong.courseregistration.auth.JwtAuthenticationFilter;
 import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.auth.service.CustomUserDetailsService;
 import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +24,13 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfig {
 
     private final JwtTokenProvider tokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    public SecurityConfig(JwtTokenProvider tokenProvider,JwtAuthenticationEntryPoint unauthorizedHandler ) {
+    public SecurityConfig(JwtTokenProvider tokenProvider,JwtAuthenticationEntryPoint unauthorizedHandler, CustomUserDetailsService customUserDetailsService) {
         this.tokenProvider = tokenProvider;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Bean
@@ -60,7 +63,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(unauthorizedHandler)
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
