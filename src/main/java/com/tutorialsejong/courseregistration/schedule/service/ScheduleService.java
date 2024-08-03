@@ -1,5 +1,7 @@
 package com.tutorialsejong.courseregistration.schedule.service;
 
+import com.tutorialsejong.courseregistration.registration.entity.CourseRegistration;
+import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
@@ -19,12 +21,15 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final WishListRepository wishListRepository;
     private final UserRepository userRepository;
+    private final CourseRegistrationRepository courseRegistrationRepository;
 
     @Autowired
-    public ScheduleService(ScheduleRepository scheduleRepository, WishListRepository wishListRepository, UserRepository userRepository) {
+    public ScheduleService(ScheduleRepository scheduleRepository, WishListRepository wishListRepository,
+                           UserRepository userRepository, CourseRegistrationRepository courseRegistrationRepository) {
         this.scheduleRepository = scheduleRepository;
         this.wishListRepository = wishListRepository;
         this.userRepository = userRepository;
+        this.courseRegistrationRepository = courseRegistrationRepository;
     }
 
     public List<Schedule> getSearchResultSchedules(ScheduleSearchRequest scheduleSearchRequest, String studentId) {
@@ -44,6 +49,10 @@ public class ScheduleService {
 
         List<Schedule> wishListSchedules = wishListRepository.findAllByStudentId(user).stream()
                 .map(WishList::getScheduleId)
+                .collect(Collectors.toList());
+
+        List<Schedule> registeredSchedules = courseRegistrationRepository.findAllByStudent(user).stream()
+                .map(CourseRegistration::getSchedule)
                 .collect(Collectors.toList());
 
         return findAllByResult.stream()

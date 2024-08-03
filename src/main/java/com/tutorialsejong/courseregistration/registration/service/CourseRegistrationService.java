@@ -67,6 +67,15 @@ public class CourseRegistrationService {
         courseRegistrationRepository.delete(registration);
     }
 
+    @Transactional
+    public void cancelAllCourseRegistrations(String studentId) {
+        User student = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+
+        List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
+        courseRegistrationRepository.deleteAll(registrations);
+    }
+
     private CourseRegistrationResponse convertToDto(CourseRegistration registration) {
         return new CourseRegistrationResponse(
                 registration.getStudent().getStudentId(),

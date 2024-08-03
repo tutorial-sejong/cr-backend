@@ -1,16 +1,16 @@
 package com.tutorialsejong.courseregistration.wishlist.service;
 
 import com.tutorialsejong.courseregistration.common.exception.CheckUserException;
+import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.wishlist.entity.WishList;
 import com.tutorialsejong.courseregistration.wishlist.repository.WishListRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 @Service
 public class WishListService {
@@ -18,11 +18,16 @@ public class WishListService {
     private final WishListRepository wishListRepository;
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
+    private final CourseRegistrationRepository courseRegistrationRepository;
 
-    public WishListService(WishListRepository wishListRepository, UserRepository userRepository, ScheduleRepository scheduleRepository) {
+    public WishListService(WishListRepository wishListRepository,
+                           UserRepository userRepository,
+                           ScheduleRepository scheduleRepository,
+                           CourseRegistrationRepository courseRegistrationRepository) {
         this.wishListRepository = wishListRepository;
         this.userRepository = userRepository;
         this.scheduleRepository = scheduleRepository;
+        this.courseRegistrationRepository = courseRegistrationRepository;
     }
 
     public void saveWishList(String studentId, List<Long> wishListIdList) {
@@ -31,11 +36,12 @@ public class WishListService {
         List<WishList> wishList = wishListIdList.stream()
                 .map(this::checkExistSchedule)
                 .filter(schedule -> !wishListRepository.existsByStudentIdAndScheduleId(user, schedule)) // 이미 등록된 관심과목 제외
+                .filter(schedule -> !courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, schedule.getScheduleId())) // 수강신청된 과목 제외
                 .map(schedule -> new WishList(user, schedule))
                 .collect(Collectors.toList());
 
         if (wishList.isEmpty()) {
-            new CheckUserException("이미 신청된 관심과목이 포함되어있습니다.");
+            throw new CheckUserException("이미 신청된 관심과목이거나 수강신청된 과목이 포함되어있습니다.");
         }
 
         wishListRepository.saveAll(wishList);
@@ -48,6 +54,7 @@ public class WishListService {
 
         return wishListList.stream()
                 .map(WishList::getScheduleId)
+                .filter(schedule -> !courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, schedule.getScheduleId())) // 수강신청된 과목 제외
                 .collect(Collectors.toList());
     }
 
