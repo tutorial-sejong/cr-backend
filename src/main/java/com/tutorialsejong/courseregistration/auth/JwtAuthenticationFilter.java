@@ -1,5 +1,8 @@
 package com.tutorialsejong.courseregistration.auth;
 
+import com.tutorialsejong.courseregistration.auth.service.CustomUserDetailsService;
+import com.tutorialsejong.courseregistration.common.exception.JwtAuthenticationException;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +18,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
         this.tokenProvider = tokenProvider;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -25,9 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            tokenProvider.validateToken(jwt);
-
             if (StringUtils.hasText(jwt)) {
+                tokenProvider.validateToken(jwt);
                 Authentication authentication = tokenProvider.getAuthentication(jwt);
 
                 if (authentication instanceof UsernamePasswordAuthenticationToken) {
@@ -37,11 +41,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException ex) {
+            logger.error("Expired JWT token", ex);
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Access Token has expired");
+        } catch (JwtAuthenticationException ex) {
+            logger.error("Invalid JWT token", ex);
+            sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid Access Token");
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing your request");
         }
+    }
 
-        filterChain.doFilter(request, response);
+    private void sendErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.getWriter().write(String.format("{\"error\": \"%s\"}", message));
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
@@ -50,5 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/api/auth/login") || path.equals("/api/auth/refresh");
     }
 }

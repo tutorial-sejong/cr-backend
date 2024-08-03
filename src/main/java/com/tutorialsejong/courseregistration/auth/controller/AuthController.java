@@ -61,7 +61,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is missing");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is missing");
         }
 
         JwtTokens jwtTokens = authService.refreshAccessToken(refreshToken);
