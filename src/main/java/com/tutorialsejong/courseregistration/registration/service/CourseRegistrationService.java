@@ -12,6 +12,7 @@ import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,18 +33,18 @@ public class CourseRegistrationService {
 
     @Transactional
     public CourseRegistrationResponse registerCourse(String studentId, Long scheduleId) {
-        User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
+        try {
+            User student = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+            Schedule schedule = scheduleRepository.findById(scheduleId)
+                    .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
 
-        if (courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId)) {
+            CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
+            registration = courseRegistrationRepository.save(registration);
+            return convertToDto(registration);
+        } catch (DataIntegrityViolationException e) {
             throw new AlreadyRegisteredException("Course already registered");
         }
-
-        CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
-        registration = courseRegistrationRepository.save(registration);
-        return convertToDto(registration);
     }
 
     @Transactional(readOnly = true)
