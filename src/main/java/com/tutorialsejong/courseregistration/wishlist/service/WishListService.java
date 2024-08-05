@@ -1,6 +1,8 @@
 package com.tutorialsejong.courseregistration.wishlist.service;
 
-import com.tutorialsejong.courseregistration.common.exception.CheckUserException;
+import com.tutorialsejong.courseregistration.common.exception.AlreadyRegisteredException;
+import com.tutorialsejong.courseregistration.common.exception.BadRequestException;
+import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
 import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.schedule.repository.ScheduleRepository;
@@ -41,7 +43,7 @@ public class WishListService {
                 .collect(Collectors.toList());
 
         if (wishList.isEmpty()) {
-            throw new CheckUserException("이미 신청된 관심과목이거나 수강신청된 과목이 포함되어있습니다.");
+            throw new AlreadyRegisteredException("이미 신청된 관심과목이거나 수강신청된 과목이 포함되어있습니다.");
         }
 
         wishListRepository.saveAll(wishList);
@@ -60,12 +62,12 @@ public class WishListService {
 
     public User checkExistUser(String studentId) {
         return userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CheckUserException(studentId + "회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(studentId + "회원이 존재하지 않습니다."));
     }
 
     public Schedule checkExistSchedule(Long scheduleId) {
         return scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new CheckUserException(scheduleId + "과목이 존재하지않습니다."));
+                .orElseThrow(() -> new NotFoundException(scheduleId + "과목이 존재하지않습니다."));
     }
 
     public void deleteWishList(String studentId, Long scheduleId) {
@@ -73,7 +75,7 @@ public class WishListService {
         Schedule schedule = checkExistSchedule(scheduleId);
 
         WishList wishList = wishListRepository.findByStudentIdAndScheduleId(user, schedule)
-                .orElseThrow(() -> new CheckUserException("신청하지 않은 과목입니다."));
+                .orElseThrow(() -> new BadRequestException("신청하지 않은 과목입니다."));
 
         wishListRepository.delete(wishList);
     }
