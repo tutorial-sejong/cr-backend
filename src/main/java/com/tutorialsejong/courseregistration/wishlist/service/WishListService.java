@@ -79,4 +79,8 @@ public class WishListService {
 
         wishListRepository.delete(wishList);
     }
+
+    public void deleteWishListsByStudent(String studentId) {
+        wishListRepository.deleteByStudentId(studentId);
+    }
 }
