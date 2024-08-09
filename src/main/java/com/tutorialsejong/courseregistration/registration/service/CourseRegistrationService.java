@@ -33,12 +33,20 @@ public class CourseRegistrationService {
 
     @Transactional
     public CourseRegistrationResponse registerCourse(String studentId, Long scheduleId) {
-        try {
-            User student = userRepository.findByStudentId(studentId)
-                    .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
-            Schedule schedule = scheduleRepository.findById(scheduleId)
-                    .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
+        User student = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
 
+        boolean alreadyRegistered = courseRegistrationRepository.findAllByStudent(student)
+                .stream()
+                .anyMatch(registration -> registration.getSchedule().getCuriNo().equals(schedule.getCuriNo()));
+
+        if (alreadyRegistered) {
+            throw new AlreadyRegisteredException("Course already registered");
+        }
+
+        try {
             CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
             registration = courseRegistrationRepository.save(registration);
             return convertToDto(registration);
