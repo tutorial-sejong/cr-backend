@@ -12,6 +12,7 @@ import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,13 +38,21 @@ public class CourseRegistrationService {
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
 
-        if (courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId)) {
+        boolean alreadyRegistered = courseRegistrationRepository.findAllByStudent(student)
+                .stream()
+                .anyMatch(registration -> registration.getSchedule().getCuriNo().equals(schedule.getCuriNo()));
+
+        if (alreadyRegistered) {
             throw new AlreadyRegisteredException("Course already registered");
         }
 
-        CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
-        registration = courseRegistrationRepository.save(registration);
-        return convertToDto(registration);
+        try {
+            CourseRegistration registration = new CourseRegistration(student, schedule, LocalDateTime.now());
+            registration = courseRegistrationRepository.save(registration);
+            return convertToDto(registration);
+        } catch (DataIntegrityViolationException e) {
+            throw new AlreadyRegisteredException("Course already registered");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -67,10 +76,23 @@ public class CourseRegistrationService {
         courseRegistrationRepository.delete(registration);
     }
 
+    @Transactional
+    public void cancelAllCourseRegistrations(String studentId) {
+        User student = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+
+        List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
+        courseRegistrationRepository.deleteAll(registrations);
+    }
+
     private CourseRegistrationResponse convertToDto(CourseRegistration registration) {
         return new CourseRegistrationResponse(
                 registration.getStudent().getStudentId(),
                 registration.getSchedule().getScheduleId()
         );
+    }
+
+    public void deleteCourseRegistrationsByStudent(String studentId) {
+        courseRegistrationRepository.deleteByStudentId(studentId);
     }
 }

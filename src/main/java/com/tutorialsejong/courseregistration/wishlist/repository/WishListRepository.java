@@ -6,6 +6,8 @@ import com.tutorialsejong.courseregistration.wishlist.entity.WishList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 public interface WishListRepository extends JpaRepository<WishList, String> {
 
@@ -15,4 +17,7 @@ public interface WishListRepository extends JpaRepository<WishList, String> {
 
     boolean existsByStudentIdAndScheduleId(User studentId, Schedule scheduleId);
 
+    @Modifying
+    @Query("DELETE FROM WishList w WHERE w.studentId.studentId = :studentId")
+    void deleteByStudentId(String studentId);
 }

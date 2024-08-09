@@ -52,4 +52,10 @@ public class CourseRegistrationController {
         courseRegistrationService.cancelCourseRegistration(userDetails.getUsername(), scheduleId);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> cancelAllCourseRegistrations(@AuthenticationPrincipal UserDetails userDetails) {
+        courseRegistrationService.cancelAllCourseRegistrations(userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
 }

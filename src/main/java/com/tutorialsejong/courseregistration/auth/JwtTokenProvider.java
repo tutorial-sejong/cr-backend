@@ -77,12 +77,10 @@ public class JwtTokenProvider {
     public void validateToken(String authToken) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
-        } catch (MalformedJwtException | UnsupportedJwtException ex) {
-            throw new JwtAuthenticationException("Invalid JWT token", ex);
         } catch (ExpiredJwtException ex) {
-            throw new JwtAuthenticationException("Expired JWT token", ex);
-        } catch (IllegalArgumentException ex) {
-            throw new JwtAuthenticationException("JWT claims string is empty", ex);
+            throw ex;
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+            throw new JwtAuthenticationException("Invalid JWT token", ex);
         }
     }
 
@@ -90,9 +88,5 @@ public class JwtTokenProvider {
         String username = getUsernameFromJWT(token);
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
-    public int getRefreshTokenExpirationInSeconds() {
-        return refreshTokenExpirationInMs / 1000;
     }
 }

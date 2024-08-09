@@ -4,13 +4,17 @@ import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
 import com.tutorialsejong.courseregistration.auth.dto.AuthenticationResult;
 import com.tutorialsejong.courseregistration.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.auth.dto.LoginRequest;
+import com.tutorialsejong.courseregistration.registration.service.CourseRegistrationService;
 import com.tutorialsejong.courseregistration.user.entity.User;
 import com.tutorialsejong.courseregistration.user.repository.InvalidRefreshTokenException;
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
+import com.tutorialsejong.courseregistration.wishlist.service.WishListService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,14 +26,21 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final WishListService wishListService;
+
+    private final CourseRegistrationService courseRegistrationService;
+
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder, WishListService wishListService, CourseRegistrationService courseRegistrationService) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+
+        this.wishListService = wishListService;
+        this.courseRegistrationService = courseRegistrationService;
     }
 
     public AuthenticationResult loginOrSignup(LoginRequest loginRequest) {
@@ -86,5 +97,13 @@ public class AuthService {
 
         String newAccessToken = tokenProvider.generateAccessTokenFromUsername(username);
         return new JwtTokens(newAccessToken, refreshToken);
+    }
+
+    @Transactional
+    public void withdrawalUser(String studentId) {
+
+        wishListService.deleteWishListsByStudent(studentId);
+        courseRegistrationService.deleteCourseRegistrationsByStudent(studentId);
+        userRepository.deleteByStudentId(studentId);
     }
 }
