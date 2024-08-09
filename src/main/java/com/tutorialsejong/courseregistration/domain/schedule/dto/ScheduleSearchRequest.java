@@ -1,0 +1,16 @@
+package com.tutorialsejong.courseregistration.domain.schedule.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ScheduleSearchRequest(
+        String curiNo,
+        String classNo,
+        String schCollegeAlias,
+        String schDeptAlias,
+        String curiTypeCdNm,
+        String sltDomainCdNm,
+        String curiNm,
+        String lesnEmp
+) {
+}

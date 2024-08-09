@@ -1,9 +1,9 @@
 package com.tutorialsejong.courseregistration.common.config;
 
-import com.tutorialsejong.courseregistration.auth.JwtAuthenticationEntryPoint;
-import com.tutorialsejong.courseregistration.auth.JwtAuthenticationFilter;
-import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
-import com.tutorialsejong.courseregistration.auth.service.CustomUserDetailsService;
+import com.tutorialsejong.courseregistration.domain.auth.JwtAuthenticationEntryPoint;
+import com.tutorialsejong.courseregistration.domain.auth.JwtAuthenticationFilter;
+import com.tutorialsejong.courseregistration.domain.auth.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
