@@ -32,21 +32,28 @@ public class WishListService {
         this.courseRegistrationRepository = courseRegistrationRepository;
     }
 
-    public void saveWishList(String studentId, List<Long> wishListIdList) {
+    public void saveWishListItem(String studentId, Long scheduleId) {
         User user = checkExistUser(studentId);
+        Schedule schedule = checkExistSchedule(scheduleId);
 
-        List<WishList> wishList = wishListIdList.stream()
-                .map(this::checkExistSchedule)
-                .filter(schedule -> !wishListRepository.existsByStudentIdAndScheduleId(user, schedule)) // 이미 등록된 관심과목 제외
-                .filter(schedule -> !courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, schedule.getScheduleId())) // 수강신청된 과목 제외
-                .map(schedule -> new WishList(user, schedule))
-                .collect(Collectors.toList());
+        String curiNo = schedule.getCuriNo();
 
-        if (wishList.isEmpty()) {
-            throw new AlreadyRegisteredException("이미 신청된 관심과목이거나 수강신청된 과목이 포함되어있습니다.");
+        boolean existsInWishList = wishListRepository.findAllByStudentId(user).stream()
+                .anyMatch(wishList -> wishList.getScheduleId().getCuriNo().equals(curiNo));
+
+        if (existsInWishList) {
+            throw new AlreadyRegisteredException("이미 관심과목 담기된 과목입니다.");
         }
 
-        wishListRepository.saveAll(wishList);
+        boolean existsInRegistration = courseRegistrationRepository
+                .existsByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId);
+
+        if (existsInRegistration) {
+            throw new AlreadyRegisteredException("이미 수강신청된 과목입니다");
+        }
+
+        WishList newWishList = new WishList(user, schedule);
+        wishListRepository.save(newWishList);
     }
 
     public List<Schedule> getWishList(String studentId) {
@@ -70,7 +77,7 @@ public class WishListService {
                 .orElseThrow(() -> new NotFoundException(scheduleId + "과목이 존재하지않습니다."));
     }
 
-    public void deleteWishList(String studentId, Long scheduleId) {
+    public void deleteWishListItem(String studentId, Long scheduleId) {
         User user = checkExistUser(studentId);
         Schedule schedule = checkExistSchedule(scheduleId);
 
