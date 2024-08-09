@@ -23,8 +23,8 @@ public class WishListController {
 
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveWishList(@RequestBody WishListRequest wishListRequest) {
-        wishListService.saveWishList(wishListRequest.studentId(), wishListRequest.wishListIdList());
+    public ResponseEntity<?> saveWishListItem(@RequestBody WishListRequest wishListRequest) {
+        wishListService.saveWishListItem(wishListRequest.studentId(), wishListRequest.scheduleId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body("관심과목이 저장되었습니다.");
     }
@@ -37,8 +37,8 @@ public class WishListController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteWishList(@RequestParam String studentId, @RequestParam Long scheduleId) {
-        wishListService.deleteWishList(studentId, scheduleId);
+    public ResponseEntity<?> deleteWishListItem(@RequestParam String studentId, @RequestParam Long scheduleId) {
+        wishListService.deleteWishListItem(studentId, scheduleId);
         return ResponseEntity.status(HttpStatus.OK).body("관심과목이 삭제되었습니다.");
     }
 }
