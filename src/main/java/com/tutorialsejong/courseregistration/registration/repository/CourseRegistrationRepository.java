@@ -6,6 +6,7 @@ import com.tutorialsejong.courseregistration.user.entity.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,8 @@ public interface CourseRegistrationRepository extends JpaRepository<CourseRegist
             "cr.student.studentId, cr.schedule.scheduleId) " +
             "FROM CourseRegistration cr WHERE cr.student.studentId = :studentId")
     List<CourseRegistrationResponse> findCourseRegistrationResponsesByStudentId(@Param("studentId") String studentId);
+
+    @Modifying
+    @Query("DELETE FROM CourseRegistration cr WHERE cr.student.studentId = :studentId")
+    void deleteByStudentId(String studentId);
 }

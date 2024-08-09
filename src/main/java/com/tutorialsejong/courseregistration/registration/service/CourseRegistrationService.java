@@ -83,4 +83,8 @@ public class CourseRegistrationService {
                 registration.getSchedule().getScheduleId()
         );
     }
+
+    public void deleteCourseRegistrationsByStudent(String studentId) {
+        courseRegistrationRepository.deleteByStudentId(studentId);
+    }
 }
