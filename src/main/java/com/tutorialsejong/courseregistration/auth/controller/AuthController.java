@@ -96,7 +96,7 @@ public class AuthController {
 
     private MacroResponse createMacroResponse() {
         Random random = new Random();
-        int randomNumber = random.nextInt(20) + 1;
+        int randomNumber = random.nextInt(30) + 1;
 
         MacroResponse.MacroData data = new MacroResponse.MacroData(
                 MACRO_ANSWERS.get(randomNumber - 1).toString(),
