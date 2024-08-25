@@ -1,6 +1,6 @@
 package com.tutorialsejong.courseregistration.domain.auth.service;
 
-import com.tutorialsejong.courseregistration.domain.auth.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
 import com.tutorialsejong.courseregistration.domain.auth.dto.AuthenticationResult;
 import com.tutorialsejong.courseregistration.domain.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.domain.auth.dto.LoginRequest;
@@ -32,7 +32,8 @@ public class AuthService {
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserRepository userRepository,
-                       PasswordEncoder passwordEncoder, WishListService wishListService, CourseRegistrationService courseRegistrationService) {
+                       PasswordEncoder passwordEncoder, WishListService wishListService,
+                       CourseRegistrationService courseRegistrationService) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;

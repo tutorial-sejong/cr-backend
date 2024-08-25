@@ -1,7 +1,7 @@
-package com.tutorialsejong.courseregistration.domain.auth;
+package com.tutorialsejong.courseregistration.common.security;
 
-import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import com.tutorialsejong.courseregistration.common.exception.JwtAuthenticationException;
+import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -50,7 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid Access Token");
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
-            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing your request");
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "An error occurred while processing your request");
         }
     }
 

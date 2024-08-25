@@ -1,4 +1,4 @@
-package com.tutorialsejong.courseregistration.domain.auth;
+package com.tutorialsejong.courseregistration.common.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
