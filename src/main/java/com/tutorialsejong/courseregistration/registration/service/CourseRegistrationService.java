@@ -12,6 +12,9 @@ import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,8 @@ public class CourseRegistrationService {
         this.userRepository = userRepository;
         this.scheduleRepository = scheduleRepository;
     }
+
+    private final static Logger logger = LoggerFactory.getLogger(CourseRegistrationService.class);
 
     @Transactional
     public CourseRegistrationResponse registerCourse(String studentId, Long scheduleId) {
@@ -79,8 +84,13 @@ public class CourseRegistrationService {
     @Transactional
     public void cancelAllCourseRegistrations(String studentId) {
         User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+                .orElseThrow(() -> {
 
+                    logger.warn("{} 존재하지 않은 id로 수강신청 요청", studentId);
+                    return new NotFoundException("User not found with id: " + studentId);
+                });
+
+        logger.info("{} 수강신청 시작", studentId);
         List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
         courseRegistrationRepository.deleteAll(registrations);
     }

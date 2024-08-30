@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -46,8 +48,13 @@ public class AuthController {
         this.authService = authService;
     }
 
+    private final static Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
+
+        logger.info("{} 로그인 시도", loginRequest.studentId());
+
         AuthenticationResult authResult = authService.loginOrSignup(loginRequest);
         ResponseCookie refreshTokenCookie = createRefreshTokenCookie(authResult.refreshToken());
 
@@ -61,6 +68,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
+            logger.warn("refreshToken이 포함되지 않은 잘못된 요청");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is missing");
         }
 
@@ -72,7 +80,7 @@ public class AuthController {
 
     @DeleteMapping("/withdrawal/{studentId}")
     public ResponseEntity<?> withdrawal(@PathVariable("studentId") String studentId) {
-
+        logger.info("{} 유저 수동 제거", studentId);
         authService.withdrawalUser(studentId);
 
         return ResponseEntity.ok().build();

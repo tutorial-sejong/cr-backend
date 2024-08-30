@@ -1,6 +1,7 @@
 package com.tutorialsejong.courseregistration.auth.service;
 
 import com.tutorialsejong.courseregistration.auth.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.auth.controller.AuthController;
 import com.tutorialsejong.courseregistration.auth.dto.AuthenticationResult;
 import com.tutorialsejong.courseregistration.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.auth.dto.LoginRequest;
@@ -10,6 +11,8 @@ import com.tutorialsejong.courseregistration.user.repository.InvalidRefreshToken
 import com.tutorialsejong.courseregistration.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.wishlist.service.WishListService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +33,9 @@ public class AuthService {
 
     private final CourseRegistrationService courseRegistrationService;
 
+    private final static Logger logger = LoggerFactory.getLogger(AuthService.class);
+
+
     public AuthService(AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
                        UserRepository userRepository,
@@ -47,6 +53,9 @@ public class AuthService {
         User user = findOrCreateUser(loginRequest);
         Authentication authentication = authenticate(loginRequest);
         JwtTokens jwtTokens = generateTokens(authentication, user);
+
+        logger.info("{} 로그인 성공", loginRequest);
+
         return new AuthenticationResult(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
     }
 
@@ -57,6 +66,9 @@ public class AuthService {
 
     private User createNewUser(LoginRequest loginRequest) {
         User newUser = new User(loginRequest.studentId(), encodePassword(loginRequest.password()));
+
+        logger.info("{} 회원가입 성공", loginRequest.studentId());
+
         return userRepository.save(newUser);
     }
 
@@ -89,13 +101,19 @@ public class AuthService {
         String username = tokenProvider.getUsernameFromJWT(refreshToken);
 
         User user = userRepository.findByStudentId(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> {
+                    logger.warn("{} DB에 존재하지 않아 refreshToken 발급 실패", username);
+                    return new UsernameNotFoundException("User not found with username: " + username);
+                });
+
 
         if (!user.getRefreshToken().equals(refreshToken)) {
+            logger.warn("{} 잘못된 refreshToken으로 재발급 실패", username);
             throw new InvalidRefreshTokenException("Invalid refresh token");
         }
 
         String newAccessToken = tokenProvider.generateAccessTokenFromUsername(username);
+        logger.info("{} refreshToken 재발급 성공", username);
         return new JwtTokens(newAccessToken, refreshToken);
     }
 
