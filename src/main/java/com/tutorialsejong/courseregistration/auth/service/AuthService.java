@@ -54,7 +54,7 @@ public class AuthService {
         Authentication authentication = authenticate(loginRequest);
         JwtTokens jwtTokens = generateTokens(authentication, user);
 
-        logger.info("{} 로그인 성공", loginRequest);
+        logger.info("{} 로그인 성공", loginRequest.studentId());
 
         return new AuthenticationResult(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
     }
