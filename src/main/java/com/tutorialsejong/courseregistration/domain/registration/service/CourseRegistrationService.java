@@ -1,10 +1,10 @@
 package com.tutorialsejong.courseregistration.domain.registration.service;
 
-import com.tutorialsejong.courseregistration.common.exception.AlreadyRegisteredException;
 import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
-import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.domain.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.domain.registration.entity.CourseRegistration;
+import com.tutorialsejong.courseregistration.domain.registration.exception.CourseAlreadyRegisteredException;
+import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
@@ -43,7 +43,7 @@ public class CourseRegistrationService {
                 .anyMatch(registration -> registration.getSchedule().getCuriNo().equals(schedule.getCuriNo()));
 
         if (alreadyRegistered) {
-            throw new AlreadyRegisteredException("Course already registered");
+            throw new CourseAlreadyRegisteredException();
         }
 
         try {
@@ -51,7 +51,7 @@ public class CourseRegistrationService {
             registration = courseRegistrationRepository.save(registration);
             return convertToDto(registration);
         } catch (DataIntegrityViolationException e) {
-            throw new AlreadyRegisteredException("Course already registered");
+            throw new CourseAlreadyRegisteredException();
         }
     }
 

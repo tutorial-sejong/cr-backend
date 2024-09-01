@@ -1,6 +1,5 @@
 package com.tutorialsejong.courseregistration.domain.wishlist.service;
 
-import com.tutorialsejong.courseregistration.common.exception.AlreadyRegisteredException;
 import com.tutorialsejong.courseregistration.common.exception.BadRequestException;
 import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
 import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
@@ -8,8 +7,10 @@ import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
-import com.tutorialsejong.courseregistration.domain.wishlist.repository.WishListRepository;
 import com.tutorialsejong.courseregistration.domain.wishlist.entity.WishList;
+import com.tutorialsejong.courseregistration.domain.wishlist.exception.AlreadyInWishlistException;
+import com.tutorialsejong.courseregistration.domain.wishlist.exception.WishlistCourseAlreadyRegisteredException;
+import com.tutorialsejong.courseregistration.domain.wishlist.repository.WishListRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -42,14 +43,14 @@ public class WishListService {
                 .anyMatch(wishList -> wishList.getScheduleId().getCuriNo().equals(curiNo));
 
         if (existsInWishList) {
-            throw new AlreadyRegisteredException("이미 관심과목 담기된 과목입니다.");
+            throw new AlreadyInWishlistException();
         }
 
         boolean existsInRegistration = courseRegistrationRepository
                 .existsByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId);
 
         if (existsInRegistration) {
-            throw new AlreadyRegisteredException("이미 수강신청된 과목입니다");
+            throw new WishlistCourseAlreadyRegisteredException();
         }
 
         WishList newWishList = new WishList(user, schedule);
@@ -63,7 +64,8 @@ public class WishListService {
 
         return wishListList.stream()
                 .map(WishList::getScheduleId)
-                .filter(schedule -> !courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(studentId, schedule.getScheduleId())) // 수강신청된 과목 제외
+                .filter(schedule -> !courseRegistrationRepository.existsByStudentStudentIdAndScheduleScheduleId(
+                        studentId, schedule.getScheduleId())) // 수강신청된 과목 제외
                 .collect(Collectors.toList());
     }
 
