@@ -10,7 +10,7 @@ import org.springframework.validation.FieldError;
 public record ErrorResponse(
         @JsonUnwrapped
         ErrorCode errorCode,
- 
+
         @JsonInclude(Include.NON_EMPTY)
         List<InvalidParam> invalidParams
 ) {

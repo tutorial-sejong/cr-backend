@@ -38,7 +38,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(ErrorResponse.InvalidParam::from)
                 .toList();
 
-        return ErrorResponse.of(ErrorCode.INVALID_PARAMETER, invalidParams).asHttp();
+        return ErrorResponse.of(GlobalErrorCode.INVALID_INPUT_VALUE, invalidParams).asHttp();
     }
 
     @ExceptionHandler(BadCredentialsException.class)
