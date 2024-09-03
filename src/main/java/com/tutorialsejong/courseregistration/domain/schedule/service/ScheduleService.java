@@ -6,6 +6,7 @@ import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleSearchR
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
+import com.tutorialsejong.courseregistration.domain.user.exception.UserNotFoundException;
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class ScheduleService {
 
     public List<Schedule> getSearchResultSchedules(ScheduleSearchRequest scheduleSearchRequest, String studentId) {
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
         List<Schedule> findAllByResult = scheduleRepository.findAllBy(
                 scheduleSearchRequest.curiNo(),

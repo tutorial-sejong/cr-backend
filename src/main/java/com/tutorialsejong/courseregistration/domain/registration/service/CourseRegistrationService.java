@@ -1,13 +1,14 @@
 package com.tutorialsejong.courseregistration.domain.registration.service;
 
-import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
 import com.tutorialsejong.courseregistration.domain.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.domain.registration.entity.CourseRegistration;
 import com.tutorialsejong.courseregistration.domain.registration.exception.CourseAlreadyRegisteredException;
 import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.domain.schedule.exception.ScheduleNotFoundException;
 import com.tutorialsejong.courseregistration.domain.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
+import com.tutorialsejong.courseregistration.domain.user.exception.UserNotFoundException;
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,9 +35,9 @@ public class CourseRegistrationService {
     @Transactional
     public CourseRegistrationResponse registerCourse(String studentId, Long scheduleId) {
         User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+                .orElseThrow(() -> new UserNotFoundException());
         Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new NotFoundException("Schedule not found with id: " + scheduleId));
+                .orElseThrow(() -> new ScheduleNotFoundException());
 
         boolean alreadyRegistered = courseRegistrationRepository.findAllByStudent(student)
                 .stream()
@@ -58,7 +59,7 @@ public class CourseRegistrationService {
     @Transactional(readOnly = true)
     public List<Schedule> getRegisteredCourses(String studentId) {
         User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+                .orElseThrow(() -> new UserNotFoundException());
 
         List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
 
@@ -71,7 +72,7 @@ public class CourseRegistrationService {
     public void cancelCourseRegistration(String studentId, Long scheduleId) {
         CourseRegistration registration = courseRegistrationRepository
                 .findByStudentStudentIdAndScheduleScheduleId(studentId, scheduleId)
-                .orElseThrow(() -> new NotFoundException("Course registration not found"));
+                .orElseThrow(() -> new ScheduleNotFoundException());
 
         courseRegistrationRepository.delete(registration);
     }
@@ -79,7 +80,7 @@ public class CourseRegistrationService {
     @Transactional
     public void cancelAllCourseRegistrations(String studentId) {
         User student = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + studentId));
+                .orElseThrow(() -> new UserNotFoundException());
 
         List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
         courseRegistrationRepository.deleteAll(registrations);

@@ -1,15 +1,16 @@
 package com.tutorialsejong.courseregistration.domain.wishlist.service;
 
-import com.tutorialsejong.courseregistration.common.exception.BadRequestException;
-import com.tutorialsejong.courseregistration.common.exception.NotFoundException;
 import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.domain.schedule.exception.ScheduleNotFoundException;
 import com.tutorialsejong.courseregistration.domain.schedule.repository.ScheduleRepository;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
+import com.tutorialsejong.courseregistration.domain.user.exception.UserNotFoundException;
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.domain.wishlist.entity.WishList;
 import com.tutorialsejong.courseregistration.domain.wishlist.exception.AlreadyInWishlistException;
 import com.tutorialsejong.courseregistration.domain.wishlist.exception.WishlistCourseAlreadyRegisteredException;
+import com.tutorialsejong.courseregistration.domain.wishlist.exception.WishlistNotFoundException;
 import com.tutorialsejong.courseregistration.domain.wishlist.repository.WishListRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,12 +72,12 @@ public class WishListService {
 
     public User checkExistUser(String studentId) {
         return userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException(studentId + "회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
     }
 
     public Schedule checkExistSchedule(Long scheduleId) {
         return scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new NotFoundException(scheduleId + "과목이 존재하지않습니다."));
+                .orElseThrow(() -> new ScheduleNotFoundException());
     }
 
     public void deleteWishListItem(String studentId, Long scheduleId) {
@@ -84,7 +85,7 @@ public class WishListService {
         Schedule schedule = checkExistSchedule(scheduleId);
 
         WishList wishList = wishListRepository.findByStudentIdAndScheduleId(user, schedule)
-                .orElseThrow(() -> new BadRequestException("신청하지 않은 과목입니다."));
+                .orElseThrow(() -> new WishlistNotFoundException());
 
         wishListRepository.delete(wishList);
     }

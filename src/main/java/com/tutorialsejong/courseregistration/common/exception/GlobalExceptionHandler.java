@@ -1,5 +1,6 @@
 package com.tutorialsejong.courseregistration.common.exception;
 
+import com.tutorialsejong.courseregistration.common.security.exception.JwtAuthenticationException;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,14 +32,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers,
             HttpStatusCode status,
             WebRequest request) {
-
         List<ErrorResponse.InvalidParam> invalidParams = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(ErrorResponse.InvalidParam::from)
                 .toList();
 
-        return ErrorResponse.of(GlobalErrorCode.INVALID_INPUT_VALUE, invalidParams).asHttp();
+        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
+        return ErrorResponse.of(errorCode, invalidParams).asHttp();
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -66,35 +67,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
-    @ExceptionHandler(CheckUserException.class)
-    public ResponseEntity<?> handleCheckUserException(CheckUserException ex) {
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(CourseNotRegisteredException.class)
-    public ResponseEntity<?> handleCourseNotRegisteredException(CourseNotRegisteredException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    public ResponseEntity<Object> handleGenericException(Exception ex) {
+        ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
+        return ErrorResponse.from(errorCode).asHttp();
     }
 }

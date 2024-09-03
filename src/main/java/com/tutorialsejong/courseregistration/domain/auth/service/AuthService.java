@@ -6,6 +6,7 @@ import com.tutorialsejong.courseregistration.domain.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.domain.auth.dto.LoginRequest;
 import com.tutorialsejong.courseregistration.domain.registration.service.CourseRegistrationService;
 import com.tutorialsejong.courseregistration.domain.user.entity.User;
+import com.tutorialsejong.courseregistration.domain.user.exception.UserNotFoundException;
 import com.tutorialsejong.courseregistration.domain.user.repository.InvalidRefreshTokenException;
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.domain.wishlist.service.WishListService;
@@ -14,7 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -89,7 +89,7 @@ public class AuthService {
         String username = tokenProvider.getUsernameFromJWT(refreshToken);
 
         User user = userRepository.findByStudentId(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new UserNotFoundException());
 
         if (!user.getRefreshToken().equals(refreshToken)) {
             throw new InvalidRefreshTokenException("Invalid refresh token");
