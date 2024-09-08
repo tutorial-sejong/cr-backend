@@ -1,36 +1,45 @@
 package com.tutorialsejong.courseregistration.common.exception;
 
+import com.tutorialsejong.courseregistration.common.security.exception.JwtAuthenticationException;
 import io.jsonwebtoken.ExpiredJwtException;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Object> handleBusinessException(BusinessException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        return ErrorResponse.from(errorCode).asHttp();
+    }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        List<String> errors = ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.toList());
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", errors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        List<ErrorResponse.InvalidParam> invalidParams = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(ErrorResponse.InvalidParam::from)
+                .toList();
+
+        ErrorCode errorCode = GlobalErrorCode.INVALID_INPUT_VALUE;
+        return ErrorResponse.of(errorCode, invalidParams).asHttp();
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -49,7 +58,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JwtAuthenticationException.class)
     public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex) {
-        logger.error("JWT authentication error: {}", ex.getMessage());
         Map<String, Object> body = new HashMap<>();
         if (ex.getCause() instanceof ExpiredJwtException) {
             body.put("message", Collections.singletonList("토큰이 만료되었습니다."));
@@ -59,40 +67,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
-    @ExceptionHandler(CheckUserException.class)
-    public ResponseEntity<?> handleCheckUserException(CheckUserException ex) {
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(AlreadyRegisteredException.class)
-    public ResponseEntity<?> handleAlreadyRegisteredException(AlreadyRegisteredException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
-    }
-
-    @ExceptionHandler(CourseNotRegisteredException.class)
-    public ResponseEntity<?> handleCourseNotRegisteredException(CourseNotRegisteredException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "An unexpected error occurred");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequestException(BadRequestException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    public ResponseEntity<Object> handleGenericException(Exception ex) {
+        ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
+        return ErrorResponse.from(errorCode).asHttp();
     }
 }
