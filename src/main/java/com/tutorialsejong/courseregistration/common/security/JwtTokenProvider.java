@@ -1,6 +1,7 @@
 package com.tutorialsejong.courseregistration.common.security;
 
-import com.tutorialsejong.courseregistration.common.security.exception.JwtAuthenticationException;
+import com.tutorialsejong.courseregistration.common.security.exception.JwtTokenExpiredException;
+import com.tutorialsejong.courseregistration.common.security.exception.JwtTokenInvalidException;
 import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -57,9 +58,6 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessTokenFromUsername(String username) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + accessTokenExpirationInMs);
-
         return generateToken(username, accessTokenExpirationInMs);
     }
 
@@ -74,13 +72,13 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    public void validateToken(String authToken) {
+    public void validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         } catch (ExpiredJwtException ex) {
-            throw ex;
+            throw new JwtTokenExpiredException();
         } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
-            throw new JwtAuthenticationException("Invalid JWT token", ex);
+            throw new JwtTokenInvalidException();
         }
     }
 

@@ -2,9 +2,10 @@ package com.tutorialsejong.courseregistration.common.config;
 
 import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationEntryPoint;
 import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationFilter;
+import com.tutorialsejong.courseregistration.common.security.JwtExceptionFilter;
 import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
-import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,20 +20,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtTokenProvider tokenProvider;
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    public SecurityConfig(JwtTokenProvider tokenProvider, JwtAuthenticationEntryPoint unauthorizedHandler,
-                          CustomUserDetailsService customUserDetailsService) {
-        this.tokenProvider = tokenProvider;
-        this.unauthorizedHandler = unauthorizedHandler;
-        this.customUserDetailsService = customUserDetailsService;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -65,10 +58,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(unauthorizedHandler)
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }
