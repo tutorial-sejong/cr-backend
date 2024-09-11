@@ -3,7 +3,11 @@ package com.tutorialsejong.courseregistration.common.exception;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.tutorialsejong.courseregistration.common.utils.JsonUtils;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 
@@ -23,8 +27,15 @@ public record ErrorResponse(
         return new ErrorResponse(errorCode, invalidParams);
     }
 
-    public ResponseEntity<Object> asHttp() {
+    public ResponseEntity<Object> toResponseEntity() {
         return ResponseEntity.status(errorCode.getStatus()).body(this);
+    }
+
+    public void writeTo(HttpServletResponse response) throws IOException {
+        response.setStatus(errorCode.getStatus().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(JsonUtils.toJson(this));
     }
 
     public record InvalidParam(String name, String reason) {
