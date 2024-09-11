@@ -3,8 +3,8 @@ package com.tutorialsejong.courseregistration;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.tutorialsejong.courseregistration.registration.repository.CourseRegistrationRepository;
-import com.tutorialsejong.courseregistration.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
+import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
