@@ -10,7 +10,6 @@ import com.tutorialsejong.courseregistration.domain.auth.swagger.LoginOperation;
 import com.tutorialsejong.courseregistration.domain.auth.swagger.MacroOperation;
 import com.tutorialsejong.courseregistration.domain.auth.swagger.RefreshOperation;
 import com.tutorialsejong.courseregistration.domain.auth.swagger.WithdrawalOperation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
