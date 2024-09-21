@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum ScheduleErrorCode implements ErrorCode {
 
     SCHEDULE_NOT_FOUND("S001", "존재하지 않는 강의입니다.", HttpStatus.NOT_FOUND),
+    BAD_REQUEST("S002", "유효하지 않은 Parameter 입니다.", HttpStatus.BAD_REQUEST),
     ;
 
     private final String code;
