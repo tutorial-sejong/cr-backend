@@ -6,6 +6,12 @@ import com.tutorialsejong.courseregistration.domain.auth.dto.LoginRequest;
 import com.tutorialsejong.courseregistration.domain.auth.dto.LoginResponse;
 import com.tutorialsejong.courseregistration.domain.auth.dto.MacroResponse;
 import com.tutorialsejong.courseregistration.domain.auth.service.AuthService;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.LoginOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.MacroOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.RefreshOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.WithdrawalOperation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -23,6 +29,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name="인증", description = "유저 인증 관련 API")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -46,6 +53,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @LoginOperation
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
         AuthenticationResult authResult = authService.loginOrSignup(loginRequest);
@@ -58,6 +66,7 @@ public class AuthController {
     }
 
 
+    @RefreshOperation
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
@@ -70,6 +79,7 @@ public class AuthController {
         return ResponseEntity.ok().body(body);
     }
 
+    @WithdrawalOperation
     @DeleteMapping("/withdrawal/{studentId}")
     public ResponseEntity<?> withdrawal(@PathVariable("studentId") String studentId) {
 
@@ -78,6 +88,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @MacroOperation
     @GetMapping("/macro")
     public ResponseEntity<?> verificationCodes() {
         MacroResponse body = createMacroResponse();

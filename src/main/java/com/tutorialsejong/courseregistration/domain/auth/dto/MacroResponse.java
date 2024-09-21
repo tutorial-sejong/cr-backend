@@ -1,6 +1,9 @@
 package com.tutorialsejong.courseregistration.domain.auth.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class MacroResponse {
+    @Schema(description = "응답 코드", defaultValue = "200")
     private Integer statusCode;
     private MacroData data;
 
@@ -26,7 +29,9 @@ public class MacroResponse {
     }
 
     public static class MacroData {
+        @Schema(description = "정답", defaultValue = "1")
         private String answer;
+        @Schema(description = "이미지 주소", defaultValue = "/macro/1.jpg")
         private String url;
 
         public MacroData(String answer, String url) {
