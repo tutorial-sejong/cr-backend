@@ -35,6 +35,5 @@ import java.lang.annotation.Target;
                 content = @Content()
         )
 })
-
 public @interface WithdrawalOperation {
 }

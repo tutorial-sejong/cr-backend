@@ -1,5 +1,6 @@
 package com.tutorialsejong.courseregistration.domain.wishlist.controller;
 
+import com.tutorialsejong.courseregistration.domain.registration.dto.CourseRegistrationResponse;
 import com.tutorialsejong.courseregistration.domain.wishlist.dto.WishListRequest;
 import com.tutorialsejong.courseregistration.domain.wishlist.service.WishListService;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
@@ -32,7 +33,7 @@ public class WishListController {
     public ResponseEntity<?> saveWishListItem(@RequestBody WishListRequest wishListRequest) {
         wishListService.saveWishListItem(wishListRequest.studentId(), wishListRequest.scheduleId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("관심과목이 저장되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetWishListOperation
@@ -52,6 +53,6 @@ public class WishListController {
 
             @RequestParam("scheduleId") Long scheduleId) {
         wishListService.deleteWishListItem(studentId, scheduleId);
-        return ResponseEntity.status(HttpStatus.OK).body("관심과목이 삭제되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

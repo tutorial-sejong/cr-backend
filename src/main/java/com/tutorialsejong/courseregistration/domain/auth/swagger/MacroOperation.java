@@ -1,9 +1,6 @@
 package com.tutorialsejong.courseregistration.domain.auth.swagger;
 
-import com.tutorialsejong.courseregistration.common.exception.ErrorResponse;
 import com.tutorialsejong.courseregistration.common.security.AuthenticationFailedResponse;
-import com.tutorialsejong.courseregistration.common.security.exception.AuthenticationFailedException;
-import com.tutorialsejong.courseregistration.common.security.exception.SecurityErrorCode;
 import com.tutorialsejong.courseregistration.domain.auth.dto.MacroResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

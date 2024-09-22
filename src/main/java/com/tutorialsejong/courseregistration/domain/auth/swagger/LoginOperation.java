@@ -26,7 +26,4 @@ import java.lang.annotation.Target;
         )
 })
 public @interface LoginOperation {
-    String studentId() default "";
-
-    String password() default "";
 }
