@@ -6,7 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtExceptionFilter extends OncePerRequestFilter {
@@ -19,6 +21,8 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         } catch (JwtException e) {
             ErrorResponse.from(e.getErrorCode())
                     .writeTo(response);
+        } catch (Exception e) {
+            throw e;
         }
     }
 }
