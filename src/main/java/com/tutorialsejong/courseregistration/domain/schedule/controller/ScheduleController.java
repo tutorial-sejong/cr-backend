@@ -3,6 +3,8 @@ package com.tutorialsejong.courseregistration.domain.schedule.controller;
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ErrorDto;
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
+import com.tutorialsejong.courseregistration.domain.schedule.exception.ScheduleBadRequestException;
+import com.tutorialsejong.courseregistration.domain.schedule.exception.ScheduleNotFoundException;
 import com.tutorialsejong.courseregistration.domain.schedule.service.ScheduleService;
 import java.util.Date;
 import java.util.List;
@@ -11,6 +13,10 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import com.tutorialsejong.courseregistration.domain.schedule.swagger.GetScheduleOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
+@Tag(name="시간표", description = "2024 2학기 시간표 조회 API")
 @RestController
 @RequestMapping("/schedules")
 public class ScheduleController {
@@ -37,22 +44,21 @@ public class ScheduleController {
         this.scheduleService = scheduleService;
     }
 
+    @GetScheduleOperation
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSearchSchedules(ScheduleSearchRequest searchRequest,
+    public ResponseEntity<?> getSearchSchedules(@ParameterObject ScheduleSearchRequest searchRequest,
                                                 WebRequest request,
                                                 @AuthenticationPrincipal UserDetails userDetails) {
         Set<String> invalidParams = validateParameters(request);
         if (!invalidParams.isEmpty()) {
-            String message = "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorDto(new Date(), 400, message, request.getDescription(false)));
+            throw new ScheduleBadRequestException();
         }
 
         String studentId = userDetails.getUsername();
         List<Schedule> searchResult = scheduleService.getSearchResultSchedules(searchRequest, studentId);
 
         if (searchResult.isEmpty()) {
-            return createErrorResponse(HttpStatus.NOT_FOUND, "검색된 값 없음", request);
+            throw new ScheduleNotFoundException();
         }
 
         return ResponseEntity.ok().body(searchResult);

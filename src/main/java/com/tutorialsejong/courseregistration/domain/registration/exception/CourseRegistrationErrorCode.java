@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CourseRegistrationErrorCode implements ErrorCode {
 
-    COURSE_ALREADY_REGISTERED("C001", "이미 수강신청된 과목입니다.", HttpStatus.CONFLICT),
+    COURSE_ALREADY_REGISTERED("R001", "이미 수강신청된 과목입니다.", HttpStatus.CONFLICT),
+    USER_NOT_FOUND("R002", "존재하지 않는 유저입니다.", HttpStatus.NOT_FOUND),
     ;
 
     private final String code;
