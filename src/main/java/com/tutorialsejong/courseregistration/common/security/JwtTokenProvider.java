@@ -2,6 +2,10 @@ package com.tutorialsejong.courseregistration.common.security;
 
 import com.tutorialsejong.courseregistration.common.security.exception.JwtTokenExpiredException;
 import com.tutorialsejong.courseregistration.common.security.exception.JwtTokenInvalidException;
+import com.tutorialsejong.courseregistration.common.utils.log.LogAction;
+import com.tutorialsejong.courseregistration.common.utils.log.LogMessage;
+import com.tutorialsejong.courseregistration.common.utils.log.LogReason;
+import com.tutorialsejong.courseregistration.common.utils.log.LogResult;
 import com.tutorialsejong.courseregistration.domain.auth.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -11,6 +15,9 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +26,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+
     private final Key key;
     private final int accessTokenExpirationInMs;
     private final int refreshTokenExpirationInMs;
@@ -76,8 +85,22 @@ public class JwtTokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         } catch (ExpiredJwtException ex) {
+            String username = getUsernameFromJWT(token);
+            logger.warn(LogMessage.builder()
+                            .action(LogAction.VALIDATE_TOKEN)
+                            .subject("s"+username)
+                            .result(LogResult.FAIL)
+                            .reason(LogReason.EXPIRED)
+                    .build().toString());
             throw new JwtTokenExpiredException();
         } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+            String username = getUsernameFromJWT(token);
+            logger.warn(LogMessage.builder()
+                    .action(LogAction.VALIDATE_TOKEN)
+                    .subject("s"+username)
+                    .result(LogResult.FAIL)
+                    .reason(LogReason.INVALID_CREDENTIAL)
+                    .build().toString());
             throw new JwtTokenInvalidException();
         }
     }

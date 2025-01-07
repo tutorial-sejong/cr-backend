@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
     private static final String COOKIE_PATH = "/";
     private static final List<Integer> MACRO_ANSWERS = Arrays.asList(

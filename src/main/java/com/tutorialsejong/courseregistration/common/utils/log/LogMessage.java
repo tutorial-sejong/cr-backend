@@ -1,18 +1,4 @@
-public enum LogResult {
-    SUCCESS,
-    FAIL,
-    ERROR
-}
-
-
-enum LogReason {
-    INVALID_CREDENTIAL,
-    NOT_FOUND,
-    TIMEOUT,
-    UNKNOWN
-    // 필요 시 계속 추가
-}
-
+package com.tutorialsejong.courseregistration.common.utils.log;
 
 public class LogMessage {
     private LogAction action;    // 예: LOGIN, LOGOUT
@@ -49,22 +35,22 @@ public class LogMessage {
         StringBuilder sb = new StringBuilder();
 
         if (action != null) {
-            sb.append("ACTION=").append(action.name());
+            sb.append("").append(action.name());
         }
         if (subject != null) {
-            sb.append(" | SUBJECT=").append(subject);
+            sb.append(" | ").append(subject);
         }
         if (objectName != null) {
-            sb.append(" | OBJECT=").append(objectName);
+            sb.append(" | ").append(objectName);
         }
         if (result != null) {
-            sb.append(" | RESULT=").append(result.name());
+            sb.append(" | ").append(result.name());
         }
         if (reason != null) {
-            sb.append(" | REASON=").append(reason.name());
+            sb.append(" | ").append(reason.name());
         }
         if (extras != null && !extras.isEmpty()) {
-            sb.append(" | EXTRAS=").append(extras);
+            sb.append(" | ").append(extras);
         }
         return sb.toString();
     }
