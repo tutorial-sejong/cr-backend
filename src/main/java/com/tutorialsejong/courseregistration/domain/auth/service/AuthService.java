@@ -1,6 +1,10 @@
 package com.tutorialsejong.courseregistration.domain.auth.service;
 
 import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.common.utils.log.LogAction;
+import com.tutorialsejong.courseregistration.common.utils.log.LogMessage;
+import com.tutorialsejong.courseregistration.common.utils.log.LogReason;
+import com.tutorialsejong.courseregistration.common.utils.log.LogResult;
 import com.tutorialsejong.courseregistration.domain.auth.dto.AuthenticationResult;
 import com.tutorialsejong.courseregistration.domain.auth.dto.JwtTokens;
 import com.tutorialsejong.courseregistration.domain.auth.dto.LoginRequest;
@@ -11,6 +15,8 @@ import com.tutorialsejong.courseregistration.domain.user.repository.InvalidRefre
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.domain.wishlist.service.WishListService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
@@ -47,6 +56,15 @@ public class AuthService {
         User user = findOrCreateUser(loginRequest);
         Authentication authentication = authenticate(loginRequest);
         JwtTokens jwtTokens = generateTokens(authentication, user);
+
+        logger.info(LogMessage.builder()
+                .action(LogAction.LOGIN)
+                .subject("s"+user.getStudentId())
+                .result(LogResult.SUCCESS)
+                .build()
+                .toString()
+        );
+
         return new AuthenticationResult(jwtTokens.accessToken(), jwtTokens.refreshToken(), user.getStudentId());
     }
 
@@ -56,6 +74,7 @@ public class AuthService {
     }
 
     private User createNewUser(LoginRequest loginRequest) {
+
         User newUser = new User(loginRequest.studentId(), encodePassword(loginRequest.password()));
         return userRepository.save(newUser);
     }
@@ -92,6 +111,12 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFoundException());
 
         if (!user.getRefreshToken().equals(refreshToken)) {
+            logger.warn(LogMessage.builder()
+                    .action(LogAction.REFRESH_TOKEN)
+                    .subject("s"+username)
+                    .result(LogResult.FAIL)
+                    .reason(LogReason.INVALID_CREDENTIAL)
+                    .build().toString());
             throw new InvalidRefreshTokenException("Invalid refresh token");
         }
 
@@ -101,9 +126,15 @@ public class AuthService {
 
     @Transactional
     public void withdrawalUser(String studentId) {
-
         wishListService.deleteWishListsByStudent(studentId);
         courseRegistrationService.deleteCourseRegistrationsByStudent(studentId);
         userRepository.deleteByStudentId(studentId);
+
+        logger.info(LogMessage.builder()
+                .action(LogAction.WITHDRAWAL)
+                .subject("s"+studentId)
+                .result(LogResult.SUCCESS)
+                .build()
+                .toString());
     }
 }

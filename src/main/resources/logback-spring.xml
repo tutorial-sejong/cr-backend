@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <!-- 콘솔에 로그를 출력하기 위한 Appender 설정 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%highlight(%-5level)] [%cyan(%logger{36}.%method:line%line)] - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- dev 프로파일 -->
+    <springProfile name="dev">
+        <!-- RollingFileAppender 사용 -->
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!-- 현재 쓰고있는(액티브) 로그 파일 -->
+            <file>logs/tutorial-sejong-log.log</file>
+
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%logger{36}.%method:line%line] - %msg%n</pattern>
+            </encoder>
+
+            <!-- 날짜 기반 롤링 설정 -->
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 백업 파일명: tutorial-sejong-log-2025-01-07.log 식으로 생성 -->
+                <fileNamePattern>logs/backup/tutorial-sejong-log-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 로그 보관 개수 (30일) -->
+                <maxHistory>30</maxHistory>
+            </rollingPolicy>
+        </appender>
+    </springProfile>
+
+    <!-- prod 프로파일 -->
+    <springProfile name="prod">
+        <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/home/anhye0n/web/tutorial_sejong/backend/logs/tutorial-sejong-log.log</file>
+
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%logger{36}.%method:line%line] - %msg%n</pattern>
+            </encoder>
+
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/home/anhye0n/web/tutorial_sejong/backend/logs/backup/tutorial-sejong-log-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>50</maxHistory>
+            </rollingPolicy>
+        </appender>
+    </springProfile>
+
+    <!-- 루트 로거 설정 -->
+    <root level="info">
+        <appender-ref ref="console" />
+        <appender-ref ref="file" />
+    </root>
+
+    <!-- 특정 패키지 로거 설정 -->
+    <logger name="org.springframework" level="info" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="file" />
+    </logger>
+
+</configuration>

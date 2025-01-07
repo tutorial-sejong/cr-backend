@@ -1,6 +1,9 @@
 package com.tutorialsejong.courseregistration.common.exception;
 
+import com.tutorialsejong.courseregistration.domain.auth.controller.AuthController;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Getter
 public class BusinessException extends RuntimeException {
