@@ -14,12 +14,10 @@ import com.tutorialsejong.courseregistration.domain.user.exception.UserNotFoundE
 import com.tutorialsejong.courseregistration.domain.user.repository.UserRepository;
 import com.tutorialsejong.courseregistration.domain.wishlist.entity.WishList;
 import com.tutorialsejong.courseregistration.domain.wishlist.exception.AlreadyInWishlistException;
-import com.tutorialsejong.courseregistration.domain.wishlist.exception.WishlistCourseAlreadyRegisteredException;
 import com.tutorialsejong.courseregistration.domain.wishlist.exception.WishlistNotFoundException;
 import com.tutorialsejong.courseregistration.domain.wishlist.repository.WishListRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -47,8 +45,8 @@ public class WishListService {
     public void saveWishListItem(String studentId, Long scheduleId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.ADD_WISHLIST)
-                .subject("s"+studentId)
-                .objectName("c"+scheduleId)
+                .subject("s" + studentId)
+                .objectName("c" + scheduleId)
                 .result(LogResult.SUCCESS)
                 .extras("Starting wishlist addition")
                 .build().toString());
@@ -64,8 +62,8 @@ public class WishListService {
         if (existsInWishList) {
             logger.warn(LogMessage.builder()
                     .action(LogAction.ADD_WISHLIST)
-                    .subject("s"+studentId)
-                    .objectName("c"+scheduleId)
+                    .subject("s" + studentId)
+                    .objectName("c" + scheduleId)
                     .result(LogResult.FAIL)
                     .reason(LogReason.ALREADY_EXIST)
                     .build().toString());
@@ -74,10 +72,14 @@ public class WishListService {
 
         WishList newWishList = new WishList(user, schedule);
         wishListRepository.save(newWishList);
+
+        schedule.incrementWishCount();
+        scheduleRepository.save(schedule);
+        
         logger.info(LogMessage.builder()
                 .action(LogAction.ADD_WISHLIST)
-                .subject("s"+studentId)
-                .objectName("c"+scheduleId)
+                .subject("s" + studentId)
+                .objectName("c" + scheduleId)
                 .result(LogResult.SUCCESS)
                 .extras("Successfully added to wishlist")
                 .build().toString());
@@ -86,7 +88,7 @@ public class WishListService {
     public List<Schedule> getWishList(String studentId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.FETCH_REGISTERED_COURSES)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Fetching wishlist")
                 .build().toString());
@@ -97,7 +99,7 @@ public class WishListService {
 
         logger.info(LogMessage.builder()
                 .action(LogAction.FETCH_REGISTERED_COURSES)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Wishlist fetched successfully")
                 .build().toString());
@@ -112,7 +114,7 @@ public class WishListService {
     public User checkExistUser(String studentId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.VALIDATE_USER)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Validating user existence")
                 .build().toString());
@@ -121,7 +123,7 @@ public class WishListService {
                 .orElseThrow(() -> {
                     logger.warn(LogMessage.builder()
                             .action(LogAction.VALIDATE_USER)
-                            .subject("s"+studentId)
+                            .subject("s" + studentId)
                             .result(LogResult.FAIL)
                             .reason(LogReason.NOT_FOUND)
                             .extras("User not found")
@@ -133,7 +135,7 @@ public class WishListService {
     public Schedule checkExistSchedule(Long scheduleId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.VALIDATE_COURSE)
-                .objectName("c"+scheduleId)
+                .objectName("c" + scheduleId)
                 .result(LogResult.SUCCESS)
                 .extras("Validating schedule existence")
                 .build().toString());
@@ -142,7 +144,7 @@ public class WishListService {
                 .orElseThrow(() -> {
                     logger.warn(LogMessage.builder()
                             .action(LogAction.VALIDATE_COURSE)
-                            .objectName("c"+scheduleId)
+                            .objectName("c" + scheduleId)
                             .result(LogResult.FAIL)
                             .reason(LogReason.NOT_FOUND)
                             .extras("Schedule not found")
@@ -154,8 +156,8 @@ public class WishListService {
     public void deleteWishListItem(String studentId, Long scheduleId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.REMOVE_WISHLIST) // 추가된 LogAction
-                .subject("s"+studentId)
-                .objectName("c"+scheduleId)
+                .subject("s" + studentId)
+                .objectName("c" + scheduleId)
                 .result(LogResult.SUCCESS)
                 .extras("Starting removal of wishlist item")
                 .build().toString());
@@ -167,8 +169,8 @@ public class WishListService {
                 .orElseThrow(() -> {
                     logger.warn(LogMessage.builder()
                             .action(LogAction.REMOVE_WISHLIST)
-                            .subject("s"+studentId)
-                            .objectName("c"+scheduleId)
+                            .subject("s" + studentId)
+                            .objectName("c" + scheduleId)
                             .result(LogResult.FAIL)
                             .reason(LogReason.NOT_FOUND)
                             .extras("Wishlist item not found")
@@ -177,10 +179,14 @@ public class WishListService {
                 });
 
         wishListRepository.delete(wishList);
+
+        schedule.decrementWishCount();
+        scheduleRepository.save(schedule);
+
         logger.info(LogMessage.builder()
                 .action(LogAction.REMOVE_WISHLIST)
-                .subject("s"+studentId)
-                .objectName("c"+scheduleId)
+                .subject("s" + studentId)
+                .objectName("c" + scheduleId)
                 .result(LogResult.SUCCESS)
                 .extras("Removed wishlist item")
                 .build().toString());
@@ -189,7 +195,7 @@ public class WishListService {
     public void deleteWishListsByStudent(String studentId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.REMOVE_WISHLIST)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Starting removal of all wishlist items for the user")
                 .build().toString());
@@ -198,7 +204,7 @@ public class WishListService {
 
         logger.info(LogMessage.builder()
                 .action(LogAction.REMOVE_WISHLIST)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Removed all wishlist items for the user")
                 .build().toString());
