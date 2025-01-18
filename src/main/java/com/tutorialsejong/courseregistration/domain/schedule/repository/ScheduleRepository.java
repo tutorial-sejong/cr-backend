@@ -1,11 +1,11 @@
 package com.tutorialsejong.courseregistration.domain.schedule.repository;
 
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
+import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
@@ -36,4 +36,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             @Param("curi_nm") String curiNm,
             @Param("lesn_emp") String lesnEmp
     );
+
+    List<Schedule> findAllByOrderByWishCountDesc(Pageable pageable);
 }
