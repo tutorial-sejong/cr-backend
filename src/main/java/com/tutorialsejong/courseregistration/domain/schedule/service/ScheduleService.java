@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -63,19 +64,35 @@ public class ScheduleService {
             return Collections.emptyList();
         }
 
-        List<ScheduleResponse> responses = new ArrayList<>();
-        int currentRank = 1;
-        Long previousWishCount = null;
+        return calculatePopularSchedulesWithRank(schedules);
+    }
+
+    private List<ScheduleResponse> calculatePopularSchedulesWithRank(List<Schedule> schedules) {
+        List<ScheduleResponse> responses = new ArrayList<>(schedules.size());
+        RankInfo rankInfo = new RankInfo();
 
         for (Schedule schedule : schedules) {
-            if (previousWishCount != null && !schedule.getWishCount().equals(previousWishCount)) {
-                currentRank++;
-            }
-
-            responses.add(ScheduleResponse.from(schedule, currentRank));
-            previousWishCount = schedule.getWishCount();
+            rankInfo.updateRankIfWishCountChanged(schedule.getWishCount());
+            responses.add(ScheduleResponse.from(schedule, rankInfo.getCurrentRank()));
         }
 
         return responses;
+    }
+
+    private static class RankInfo {
+        @Getter
+        private int currentRank = 1;
+        private Long previousWishCount = null;
+
+        public void updateRankIfWishCountChanged(Long newWishCount) {
+            if (shouldIncrementRank(newWishCount)) {
+                currentRank++;
+            }
+            previousWishCount = newWishCount;
+        }
+
+        private boolean shouldIncrementRank(Long newWishCount) {
+            return previousWishCount != null && !newWishCount.equals(previousWishCount);
+        }
     }
 }
