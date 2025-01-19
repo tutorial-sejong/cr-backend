@@ -1,9 +1,18 @@
 package com.tutorialsejong.courseregistration.domain.schedule.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "course_schedule")
+@Getter
+@NoArgsConstructor
 public class Schedule {
 
     @Id
@@ -67,83 +76,14 @@ public class Schedule {
     @Column(name = "remark")
     private String remark;
 
-    public Long getScheduleId() {
-        return scheduleId;
+    @Column(name = "wish_count", nullable = false)
+    private Long wishCount = 0L;
+
+    public void incrementWishCount() {
+        this.wishCount++;
     }
 
-    public String getSchDeptAlias() {
-        return schDeptAlias;
-    }
-
-    public String getCuriNo() {
-        return curiNo;
-    }
-
-    public String getClassNo() {
-        return classNo;
-    }
-
-    public String getSchCollegeAlias() {
-        return schCollegeAlias;
-    }
-
-    public String getCuriNm() {
-        return curiNm;
-    }
-
-    public String getCuriLangNm() {
-        return curiLangNm;
-    }
-
-    public String getCuriTypeCdNm() {
-        return curiTypeCdNm;
-    }
-
-    public String getSltDomainCdNm() {
-        return sltDomainCdNm;
-    }
-
-    public String getTmNum() {
-        return tmNum;
-    }
-
-    public String getStudentYear() {
-        return studentYear;
-    }
-
-    public String getCorsUnitGrpCdNm() {
-        return corsUnitGrpCdNm;
-    }
-
-    public String getManageDeptNm() {
-        return manageDeptNm;
-    }
-
-    public String getLesnEmp() {
-        return lesnEmp;
-    }
-
-    public String getLesnTime() {
-        return lesnTime;
-    }
-
-    public String getLesnRoom() {
-        return lesnRoom;
-    }
-
-    public String getCyberTypeCdNm() {
-        return cyberTypeCdNm;
-    }
-
-    public String getInternshipTypeCdNm() {
-        return internshipTypeCdNm;
-    }
-
-    public String getInoutSubCdtExchangeYn() {
-        return inoutSubCdtExchangeYn;
-    }
-
-    public String getRemark() {
-        return remark;
+    public void decrementWishCount() {
+        this.wishCount = Math.max(0, this.wishCount - 1);
     }
 }

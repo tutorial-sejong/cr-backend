@@ -1,6 +1,7 @@
 package com.tutorialsejong.courseregistration.domain.schedule.controller;
 
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ErrorDto;
+import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleResponse;
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.service.ScheduleService;
@@ -19,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
@@ -27,7 +29,8 @@ import org.springframework.web.context.request.WebRequest;
 public class ScheduleController {
 
     private static final Set<String> ALLOWED_PARAMS = Set.of(
-            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm", "lesnEmp", "studentId"
+            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm",
+            "lesnEmp", "studentId"
     );
 
     private final ScheduleService scheduleService;
@@ -68,5 +71,12 @@ public class ScheduleController {
     private ResponseEntity<ErrorDto> createErrorResponse(HttpStatus status, String message, WebRequest request) {
         return ResponseEntity.status(status)
                 .body(new ErrorDto(new Date(), status.value(), message, request.getDescription(false)));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<ScheduleResponse>> getPopularSchedules(
+            @RequestParam(defaultValue = "10") int limit) {
+        List<ScheduleResponse> popularSchedules = scheduleService.findPopularSchedules(limit);
+        return ResponseEntity.ok(popularSchedules);
     }
 }
