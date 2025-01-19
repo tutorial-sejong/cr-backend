@@ -6,6 +6,7 @@ import com.tutorialsejong.courseregistration.common.security.JwtExceptionFilter;
 import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,12 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Value("${security.cors.allowed-origins}")
+    private String[] allowedOrigins;
+
+    @Value("${security.cors.allow-credentials}")
+    private boolean allowCredentials;
+
     private final JwtTokenProvider tokenProvider;
 
     @Bean
@@ -38,12 +45,10 @@ public class SecurityConfig {
                 .cors(cors -> cors
                         .configurationSource(request -> {
                             CorsConfiguration config = new CorsConfiguration();
-                            config.setAllowedOrigins(
-                                    Arrays.asList("https://tutorial-sejong.com", "https://frontend.local.com:3000",
-                                            "http://localhost:3000"));
+                            config.setAllowedOrigins(Arrays.asList(allowedOrigins));
+                            config.setAllowCredentials(allowCredentials);
                             config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                             config.setAllowedHeaders(Arrays.asList("*"));
-                            config.setAllowCredentials(true);
                             return config;
                         })
                 )
