@@ -6,6 +6,7 @@ import com.tutorialsejong.courseregistration.common.utils.log.LogReason;
 import com.tutorialsejong.courseregistration.common.utils.log.LogResult;
 import com.tutorialsejong.courseregistration.domain.auth.controller.AuthController;
 import com.tutorialsejong.courseregistration.domain.registration.dto.CourseRegistrationResponse;
+import com.tutorialsejong.courseregistration.domain.registration.dto.CourseRegistrationScheduleResponse;
 import com.tutorialsejong.courseregistration.domain.registration.entity.CourseRegistration;
 import com.tutorialsejong.courseregistration.domain.registration.exception.CourseAlreadyRegisteredException;
 import com.tutorialsejong.courseregistration.domain.registration.repository.CourseRegistrationRepository;
@@ -114,10 +115,10 @@ public class CourseRegistrationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Schedule> getRegisteredCourses(String studentId) {
+    public List<CourseRegistrationScheduleResponse> getRegisteredCourses(String studentId) {
         logger.info(LogMessage.builder()
                 .action(LogAction.FETCH_REGISTERED_COURSES)
-                .subject("s"+studentId)
+                .subject("s" + studentId)
                 .result(LogResult.SUCCESS)
                 .extras("Fetching registered courses")
                 .build().toString());
@@ -126,7 +127,7 @@ public class CourseRegistrationService {
                 .orElseThrow(() -> {
                     logger.warn(LogMessage.builder()
                             .action(LogAction.VALIDATE_USER)
-                            .subject("s"+studentId)
+                            .subject("s" + studentId)
                             .result(LogResult.FAIL)
                             .reason(LogReason.NOT_FOUND)
                             .build().toString());
@@ -134,7 +135,13 @@ public class CourseRegistrationService {
                 });
 
         List<CourseRegistration> registrations = courseRegistrationRepository.findAllByStudent(student);
-        return registrations.stream().map(CourseRegistration::getSchedule).collect(Collectors.toList());
+
+        List<CourseRegistrationScheduleResponse> response = registrations.stream()
+                .map(CourseRegistration::getSchedule)
+                .map(CourseRegistrationScheduleResponse::from)
+                .collect(Collectors.toList());
+
+        return response;
     }
 
     @Transactional
