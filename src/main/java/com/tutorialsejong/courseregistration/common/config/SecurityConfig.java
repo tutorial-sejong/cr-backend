@@ -1,9 +1,8 @@
 package com.tutorialsejong.courseregistration.common.config;
 
-import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationEntryPoint;
-import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationFilter;
-import com.tutorialsejong.courseregistration.common.security.JwtExceptionFilter;
-import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.common.exception.SwaggerAccessDeniedHandler;
+import com.tutorialsejong.courseregistration.common.security.*;
+
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,10 +61,13 @@ public class SecurityConfig {
                 .securityMatcher("/docs/swagger-ui/**", "/v3/api-docs/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
-                // 이 SecurityFilterChain에서만 쓸 userDetailsService 설정
                 .userDetailsService(swaggerUserManager)
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(new SwaggerAuthenticationEntryPoint())  // 401
+                        .accessDeniedHandler(new SwaggerAccessDeniedHandler())  // 403
                 );
 
         return http.build();
