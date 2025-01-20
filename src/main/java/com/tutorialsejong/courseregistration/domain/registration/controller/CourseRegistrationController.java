@@ -7,11 +7,9 @@ import com.tutorialsejong.courseregistration.domain.registration.swagger.CancelA
 import com.tutorialsejong.courseregistration.domain.registration.swagger.CancelCourseRegistrationOperation;
 import com.tutorialsejong.courseregistration.domain.registration.swagger.GetRegisteredCoursesOperation;
 import com.tutorialsejong.courseregistration.domain.registration.swagger.RegisterCourseOperation;
-import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,7 +48,8 @@ public class CourseRegistrationController {
     public ResponseEntity<List<CourseRegistrationScheduleResponse>> getRegisteredCourses(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        List<CourseRegistrationScheduleResponse> registrations = courseRegistrationService.getRegisteredCourses(userDetails.getUsername());
+        List<CourseRegistrationScheduleResponse> registrations = courseRegistrationService.getRegisteredCourses(
+                userDetails.getUsername());
         if (registrations.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

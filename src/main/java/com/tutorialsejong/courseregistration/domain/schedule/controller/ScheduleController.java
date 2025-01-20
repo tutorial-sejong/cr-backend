@@ -5,8 +5,8 @@ import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleRespons
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.service.ScheduleService;
-import com.tutorialsejong.courseregistration.domain.schedule.swagger.SearchSchedulesOperation;
 import com.tutorialsejong.courseregistration.domain.schedule.swagger.GetPopularSchedulesOperation;
+import com.tutorialsejong.courseregistration.domain.schedule.swagger.SearchSchedulesOperation;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +14,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

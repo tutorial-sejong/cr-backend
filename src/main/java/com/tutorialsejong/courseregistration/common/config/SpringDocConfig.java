@@ -1,14 +1,13 @@
 package com.tutorialsejong.courseregistration.common.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.*;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.*;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 @Configuration
 @SecurityScheme(
@@ -29,9 +28,9 @@ public class SpringDocConfig {
                 ))
                 // API 정보
                 .info(new Info()
-                                .title("Tutorial Sejong API")
-                                .version("v2.0.0")
-                                .description("Tutorial Sejong API API")
+                        .title("Tutorial Sejong API")
+                        .version("v2.0.0")
+                        .description("Tutorial Sejong API API")
                 );
     }
 }
