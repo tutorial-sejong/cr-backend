@@ -47,15 +47,6 @@ public class SecurityConfig {
     private final JwtTokenProvider tokenProvider;
 
     @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager(PasswordEncoder passwordEncoder) {
-        UserDetails admin = User.withUsername(swaggerUsername)
-                .password(passwordEncoder.encode(swaggerPassword))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(admin);
-    }
-
-    @Bean
     @Order(1)
     public SecurityFilterChain swaggerFilterChain(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
         // 1) Swagger용 인메모리 사용자 생성
