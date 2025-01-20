@@ -1,7 +1,11 @@
 package com.tutorialsejong.courseregistration.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+
+import com.tutorialsejong.courseregistration.common.exception.ErrorResponse;
+import com.tutorialsejong.courseregistration.common.exception.GlobalErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,9 +69,9 @@ public class AccessDeniedFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
         // 원하는 JSON 구조에 맞춰서 응답
-        String body = objectMapper.writeValueAsString(
-                new ErrorResponse("ACCESS_DENIED", "권한이 없습니다.")
-        );
+        ErrorResponse errorResponse = ErrorResponse.from(GlobalErrorCode.HANDLE_ACCESS_DENIED);
+        errorResponse.writeTo(response);
+        String body = objectMapper.writeValueAsString(errorResponse);
         response.getWriter().write(body);
     }
 
@@ -77,21 +81,9 @@ public class AccessDeniedFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
-        String body = objectMapper.writeValueAsString(
-                new ErrorResponse("SERVER_ERROR", ex.getMessage())
-        );
+        ErrorResponse errorResponse = ErrorResponse.from(GlobalErrorCode.INTERNAL_SERVER_ERROR);
+        errorResponse.writeTo(response);
+        String body = objectMapper.writeValueAsString(errorResponse);
         response.getWriter().write(body);
-    }
-
-    // 예시 응답 DTO
-    static class ErrorResponse {
-        private final String code;
-        private final String message;
-        public ErrorResponse(String code, String message) {
-            this.code = code;
-            this.message = message;
-        }
-        public String getCode() { return code; }
-        public String getMessage() { return message; }
     }
 }
