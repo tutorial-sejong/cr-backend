@@ -1,8 +1,11 @@
 package com.tutorialsejong.courseregistration.common.config;
 
-import com.tutorialsejong.courseregistration.common.exception.SwaggerAccessDeniedHandler;
-import com.tutorialsejong.courseregistration.common.security.*;
-
+import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationEntryPoint;
+import com.tutorialsejong.courseregistration.common.security.JwtAuthenticationFilter;
+import com.tutorialsejong.courseregistration.common.security.JwtExceptionFilter;
+import com.tutorialsejong.courseregistration.common.security.JwtTokenProvider;
+import com.tutorialsejong.courseregistration.common.security.SwaggerAccessDeniedHandler;
+import com.tutorialsejong.courseregistration.common.security.SwaggerAuthenticationEntryPoint;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +44,6 @@ public class SecurityConfig {
 
     @Value("${app.swagger.user.password}")
     private String swaggerPassword;
-
 
     private final JwtTokenProvider tokenProvider;
 
@@ -119,5 +121,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
