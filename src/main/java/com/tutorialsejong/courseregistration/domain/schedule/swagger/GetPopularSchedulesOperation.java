@@ -32,7 +32,6 @@ import org.springframework.http.MediaType;
         name = "limit",
         description = "가져올 인기 스케줄 개수 (기본값=10)",
         in = ParameterIn.QUERY,
-        required = false,
         example = "10"
 )
 public @interface GetPopularSchedulesOperation {
