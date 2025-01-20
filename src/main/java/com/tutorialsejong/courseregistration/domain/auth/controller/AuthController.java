@@ -8,6 +8,12 @@ import com.tutorialsejong.courseregistration.domain.auth.dto.LoginResponse;
 import com.tutorialsejong.courseregistration.domain.auth.dto.MacroResponse;
 import com.tutorialsejong.courseregistration.domain.auth.service.AuthService;
 import com.tutorialsejong.courseregistration.domain.auth.service.CaptchaService;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.LoginOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.MacroOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.RefreshOperation;
+import com.tutorialsejong.courseregistration.domain.auth.swagger.WithdrawalOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.Duration;
@@ -31,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Tag(name = "인증 API", description = "인증 관련 API")
 public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
@@ -42,6 +49,7 @@ public class AuthController {
     @Value("${app.jwt.refreshTokenExpirationInMs}")
     private int refreshTokenExpirationInMs;
 
+    @LoginOperation
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
         AuthenticationResult authResult = authService.loginOrSignup(loginRequest);
@@ -53,6 +61,7 @@ public class AuthController {
         return ResponseEntity.ok(loginResponse);
     }
 
+    @RefreshOperation
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
@@ -65,6 +74,7 @@ public class AuthController {
         return ResponseEntity.ok().body(body);
     }
 
+    @WithdrawalOperation
     @DeleteMapping("/withdrawal/{studentId}")
     public ResponseEntity<?> withdrawal(@PathVariable("studentId") String studentId) {
 
@@ -73,6 +83,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @MacroOperation
     @GetMapping("/macro")
     public ResponseEntity<?> getMacro() {
         CaptchaResult captchaData = captchaService.generateCaptcha();

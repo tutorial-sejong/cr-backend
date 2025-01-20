@@ -5,6 +5,8 @@ import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleRespons
 import com.tutorialsejong.courseregistration.domain.schedule.dto.ScheduleSearchRequest;
 import com.tutorialsejong.courseregistration.domain.schedule.entity.Schedule;
 import com.tutorialsejong.courseregistration.domain.schedule.service.ScheduleService;
+import com.tutorialsejong.courseregistration.domain.schedule.swagger.GetPopularSchedulesOperation;
+import com.tutorialsejong.courseregistration.domain.schedule.swagger.SearchSchedulesOperation;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +14,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,8 +32,8 @@ import org.springframework.web.context.request.WebRequest;
 public class ScheduleController {
 
     private static final Set<String> ALLOWED_PARAMS = Set.of(
-            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm", "sltDomainCdNm", "curiNm",
-            "lesnEmp", "studentId"
+            "curiNo", "classNo", "schCollegeAlias", "schDeptAlias", "curiTypeCdNm",
+            "sltDomainCdNm", "curiNm", "lesnEmp", "studentId"
     );
 
     private final ScheduleService scheduleService;
@@ -40,10 +43,13 @@ public class ScheduleController {
         this.scheduleService = scheduleService;
     }
 
+    @SearchSchedulesOperation
     @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getSearchSchedules(ScheduleSearchRequest searchRequest,
-                                                WebRequest request,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getSearchSchedules(
+            @ParameterObject ScheduleSearchRequest searchRequest,
+            WebRequest request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
         Set<String> invalidParams = validateParameters(request);
         if (!invalidParams.isEmpty()) {
             String message = "유효하지않은 Parameter. (" + String.join(", ", invalidParams) + ")";
@@ -58,12 +64,15 @@ public class ScheduleController {
             return createErrorResponse(HttpStatus.NOT_FOUND, "검색된 값 없음", request);
         }
 
-        return ResponseEntity.ok().body(searchResult);
+        // 엔티티 그대로 반환 (권장: DTO 변환)
+        return ResponseEntity.ok(searchResult);
     }
 
     private Set<String> validateParameters(WebRequest request) {
         return StreamSupport.stream(
-                        Spliterators.spliteratorUnknownSize(request.getParameterNames(), Spliterator.ORDERED), false)
+                        Spliterators.spliteratorUnknownSize(request.getParameterNames(), Spliterator.ORDERED),
+                        false
+                )
                 .filter(param -> !ALLOWED_PARAMS.contains(param))
                 .collect(Collectors.toSet());
     }
@@ -73,9 +82,11 @@ public class ScheduleController {
                 .body(new ErrorDto(new Date(), status.value(), message, request.getDescription(false)));
     }
 
+    @GetPopularSchedulesOperation
     @GetMapping("/popular")
     public ResponseEntity<List<ScheduleResponse>> getPopularSchedules(
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") int limit
+    ) {
         List<ScheduleResponse> popularSchedules = scheduleService.findPopularSchedules(limit);
         return ResponseEntity.ok(popularSchedules);
     }
