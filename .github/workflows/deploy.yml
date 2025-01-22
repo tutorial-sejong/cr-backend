@@ -23,6 +23,7 @@ jobs:
       - name: Update submodule to develop branch
         run: |
           cd src/main/resources/config
+          git fetch origin develop
           git checkout develop
           cd ../../../../
 
