@@ -1,0 +1,49 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker-files/backend/Dockerfile
+    container_name: cr-backend
+    ports:
+      - "${BACKEND_PORT}:8080"
+    volumes:
+      - .:/workspace/app
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: cr-nginx
+    ports:
+      - "${NGINX_PORT}:80"
+    volumes:
+      - ./docker-files/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:latest
+    container_name: cr-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mariadb-data:
