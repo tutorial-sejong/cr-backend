@@ -86,12 +86,16 @@ jobs:
             # 애플리케이션 디렉토리로 이동
             cd ${{ secrets.DEPLOY_PATH }}
 
-            # 실행 중인 컨테이너 종료
-            docker-compose down
+            # 현재 실행 중인 컨테이너 중지
+            docker-compose down --remove-orphans
 
-            # 중지된 컨테이너, 사용하지 않는 이미지, 네트워크, 볼륨 정리
-            echo "Cleaning up Docker resources..."
-            docker system prune -af --volumes
+            # 주기적인 정리 (예: 일주일에 한 번)
+            if [ $(date +%u) -eq 7 ]; then  # 일요일마다 실행
+            echo "Weekly cleanup..."
+            docker image prune -f --filter "until=168h"  # 7일 이상 된 미사용 이미지 정리
+            docker volume prune -f
+            docker builder prune -f --filter "until=168h"  # 오래된 빌드 캐시 정리
+            fi
 
             # 컨테이너 새로 빌드 및 시작
             echo "Starting containers..."
