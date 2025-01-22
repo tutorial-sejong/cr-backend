@@ -15,6 +15,16 @@ jobs:
       # 소스 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: true  # 서브모듈 체크아웃 활성화
+          token: ${{ secrets.GH_PAT }}  # private 서브모듈 접근용 토큰
+
+      # 서브모듈 브랜치를 develop으로 변경
+      - name: Update submodule to develop branch
+        run: |
+          cd resources/config
+          git checkout develop
+          cd ../..
 
       # 필수 환경 변수 존재 여부 확인
       - name: Check required secrets
