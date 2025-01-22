@@ -50,7 +50,7 @@ else
     echo "새로운 SSH 키를 생성합니다..."
     echo "이메일 주소를 입력해주세요:"
     read -r email
-    ssh-keygen -t rsa -b 4096 -C "$email"
+    ssh-keygen -t ed25519 -b 4096 -C "$email"
 fi
 
 # authorized_keys 설정
