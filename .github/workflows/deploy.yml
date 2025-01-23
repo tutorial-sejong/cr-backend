@@ -62,7 +62,7 @@ jobs:
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.backend.yml,docker-files/nginx/"
+          source: "docker-compose.yml,docker-files/nginx/"
           target: "${{ secrets.DEPLOY_PATH }}"
           strip_components: 0
 
@@ -98,7 +98,7 @@ jobs:
             docker-compose up -d --no-deps backend
             
             # 상태 확인
-            docker-compose -f docker-compose.backend.yml ps
+            docker-compose ps
             
             # 주간 클린업 (일요일에만)
             if [ $(date +%u) -eq 7 ]; then
