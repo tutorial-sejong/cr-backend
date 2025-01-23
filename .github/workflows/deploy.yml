@@ -36,7 +36,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GH_PAT }}
 
       # 도커 빌더 설정
       - name: Set up Docker Buildx
