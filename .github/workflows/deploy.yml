@@ -8,6 +8,9 @@ on:
 
 jobs:
   build-and-deploy:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     environment: development
 
@@ -83,6 +86,7 @@ jobs:
             BACKEND_PORT=${{ secrets.BACKEND_PORT }}
             NGINX_PORT=${{ secrets.NGINX_PORT }}
             DB_PORT=${{ secrets.DB_PORT }}
+            GITHUB_REPOSITORY=${{ github.repository }}
             EOL
             
             # 컨테이너 재시작
