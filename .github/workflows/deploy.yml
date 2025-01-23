@@ -20,6 +20,16 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.GH_PAT }}
+      
+      # Gradle 캐시 설정
+      - name: Setup Gradle cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
 
       # 서브모듈 설정
       - name: Setup submodule
@@ -37,10 +47,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GH_PAT }}
-
-      # 도커 빌더 설정
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
 
       # Backend 이미지 빌드 및 푸시
       - name: Build and push Backend image
