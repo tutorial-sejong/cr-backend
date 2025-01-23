@@ -1,17 +1,15 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: docker-files/backend/Dockerfile
+    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
     container_name: cr-backend
     environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
     ports:
       - "${BACKEND_PORT}:8080"
-    volumes:
-      - .:/workspace/app
     depends_on:
       mariadb:
         condition: service_healthy
