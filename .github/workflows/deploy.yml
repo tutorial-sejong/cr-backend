@@ -75,6 +75,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
+
+            # GitHub Container Registry 로그인 추가
+            echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # 환경 변수 파일 생성
             cat > .env << EOL
