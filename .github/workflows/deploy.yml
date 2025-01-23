@@ -16,8 +16,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true  # 서브모듈 체크아웃 활성화
-          token: ${{ secrets.GH_PAT }}  # private 서브모듈 접근용 토큰
+          submodules: true # 서브모듈 체크아웃 활성화
+          token: ${{ secrets.GH_PAT }} # private 서브모듈 접근용 토큰
 
       # 서브모듈 브랜치를 develop으로 변경
       - name: Update submodule to develop branch
@@ -26,6 +26,11 @@ jobs:
           git fetch origin develop:develop
           git checkout develop
           cd ../../../../
+
+      # data-dev.sql 복사
+      - name: Copy data-dev.sql
+        run: |
+          cp src/main/resources/config/data-dev.sql src/main/resources/data-dev.sql
 
       # 필수 환경 변수 존재 여부 확인
       - name: Check required secrets
