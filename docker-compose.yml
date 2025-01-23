@@ -12,6 +12,9 @@ services:
       - "${BACKEND_PORT}:8080"
     volumes:
       - .:/workspace/app
+    depends_on:
+      mariadb:
+        condition: service_healthy
     networks:
       - app-network
     restart: unless-stopped
@@ -32,6 +35,12 @@ services:
   mariadb:
     image: mariadb:latest
     container_name: cr-mariadb
+    healthcheck:
+      test: ["CMD", "mariadb", "-u${DB_USER}", "-p${DB_PASSWORD}", "-e", "SELECT 1"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${DB_NAME}
