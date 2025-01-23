@@ -94,8 +94,8 @@ jobs:
             EOL
             
             # 백엔드만 재배포
-            docker-compose -f docker-compose.backend.yml pull
-            docker-compose -f docker-compose.backend.yml up -d
+            docker-compose -f docker-compose.backend.yml -p deployments pull
+            docker-compose -f docker-compose.backend.yml -p deployments up -d
             
             # 상태 확인
             docker-compose -f docker-compose.backend.yml ps
