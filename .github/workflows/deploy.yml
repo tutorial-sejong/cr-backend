@@ -1,94 +1,69 @@
 name: Deploy to Development Server
 
-# docker-server 브랜치 이벤트에 대한 워크플로우 트리거 설정
 on:
   push:
-    branches: [docker-server] # docker-server 브랜치에 push가 발생하면 실행
+    branches: [docker-server]
   pull_request:
-    branches: [docker-server] # docker-server 브랜치로 PR이 생성되면 실행
+    branches: [docker-server]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest # Ubuntu 최신 버전에서 실행
-    environment: development # development 환경의 secrets 사용
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
     steps:
-      # 소스 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: true # 서브모듈 체크아웃 활성화
-          token: ${{ secrets.GH_PAT }} # private 서브모듈 접근용 토큰
+          submodules: true
+          token: ${{ secrets.GH_PAT }}
 
-      # 서브모듈 브랜치를 develop으로 변경
-      - name: Update submodule to develop branch
+      # 서브모듈 설정
+      - name: Setup submodule
         run: |
           cd src/main/resources/config
           git fetch origin develop:develop
           git checkout develop
+          cp data-dev.sql ../data-dev.sql
           cd ../../../../
 
-      # data-dev.sql 복사
-      - name: Copy data-dev.sql
-        run: |
-          cp src/main/resources/config/data-dev.sql src/main/resources/data-dev.sql
-
-      # 필수 환경 변수 존재 여부 확인
-      - name: Check required secrets
-        run: |
-          if [[ -z "${{ secrets.HOST }}" ]]; then
-            echo "Missing HOST secret"
-            exit 1
-          fi
-          if [[ -z "${{ secrets.PORT }}" ]]; then
-            echo "Missing PORT secret"
-            exit 1
-          fi
-          if [[ -z "${{ secrets.USERNAME }}" ]]; then
-            echo "Missing USERNAME secret"
-            exit 1
-          fi
-          if [[ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]]; then
-            echo "Missing SSH_PRIVATE_KEY secret"
-            exit 1
-          fi
-
-      # 환경 변수 파일 생성
-      - name: Create .env file
-        run: |
-          echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}" >> .env
-          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
-          echo "NGINX_PORT=${{ secrets.NGINX_PORT }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-
-      - name: Prepare target directory
-        uses: appleboy/ssh-action@v1.0.3
+      # GitHub Container Registry 로그인
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.HOST }}
-          port: ${{ secrets.PORT }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            rm -rf ${{ secrets.DEPLOY_PATH }}/*
-            mkdir -p ${{ secrets.DEPLOY_PATH }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
 
-      # 파일을 서버로 복사
-      - name: Copy files to server
+      # 도커 빌더 설정
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Backend 이미지 빌드 및 푸시
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker-files/backend/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 필요한 파일만 서버로 전송
+      - name: Copy deployment files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "."
+          source: "docker-compose.yml,docker-files/nginx/"
           target: "${{ secrets.DEPLOY_PATH }}"
-          debug: true # 디버그 로그 활성화
+          strip_components: 0
 
-      # 서버에서 Docker 배포 실행
-      - name: Execute deploy script
+      # 환경 변수 설정 및 배포
+      - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -96,31 +71,29 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # PATH에 homebrew bin 추가
-            export PATH="/opt/homebrew/bin:$PATH"
-
-            # 애플리케이션 디렉토리로 이동
             cd ${{ secrets.DEPLOY_PATH }}
-
-            # 현재 실행 중인 컨테이너 중지
-            docker-compose down --remove-orphans
-
-            # 주기적인 정리 (예: 일주일에 한 번)
-            if [ $(date +%u) -eq 7 ]; then  # 일요일마다 실행
-            echo "Weekly cleanup..."
-            docker image prune -f --filter "until=168h"  # 7일 이상 된 미사용 이미지 정리
-            docker volume prune -f
-            docker builder prune -f --filter "until=168h"  # 오래된 빌드 캐시 정리
-            fi
-
-            # 컨테이너 새로 빌드 및 시작
-            echo "Starting containers..."
-            docker-compose up -d --build
-
-            # 배포 결과 확인
-            echo "Checking deployment status..."
+            
+            # 환경 변수 파일 생성
+            cat > .env << EOL
+            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+            BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+            NGINX_PORT=${{ secrets.NGINX_PORT }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            EOL
+            
+            # 컨테이너 재시작
+            docker-compose pull
+            docker-compose up -d
+            
+            # 상태 확인
             docker-compose ps
-
-            # 애플리케이션 로그 확인
-            echo "Checking application logs..."
-            docker-compose logs --tail=100
+            
+            # 주간 클린업 (일요일에만)
+            if [ $(date +%u) -eq 7 ]; then
+              docker image prune -f --filter "until=168h"
+              docker volume prune -f --filter "until=168h"
+            fi
