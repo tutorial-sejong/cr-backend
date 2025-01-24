@@ -9,9 +9,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum SecurityErrorCode implements ErrorCode {
 
-    AUTHENTICATION_FAILED("S001", "인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
-    JWT_TOKEN_EXPIRED("S002", "토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
-    JWT_TOKEN_INVALID("S003", "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
+    AUTHENTICATION_FAILED("A001", "인증에 실패했습니다.", HttpStatus.UNAUTHORIZED),
+    JWT_TOKEN_EXPIRED("A002", "토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
+    JWT_TOKEN_INVALID("A003", "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     ;
 
     private final String code;
