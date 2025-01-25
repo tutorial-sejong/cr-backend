@@ -32,30 +32,39 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # --- (1) build 시 테스트 무시: -x test ---
       - name: Build with Gradle
         run: ./gradlew build -x test
 
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
+      # 빌드 산출물(JAR 파일)을 원격 서버로 복사
       - name: Copy build artifacts
         run: |
           JAR_FILE=$(ls build/libs/*.jar | sort -r | head -n 1)
           echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
-          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r $JAR_FILE ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/anhye0n/web/tutorial_sejong/backend/
+          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/anhye0n/web/tutorial_sejong/backend/
 
+      # --- (2) systemd daemon-reload 추가 후 서비스 재시작 ---
       - name: Restart backend service
         run: |
           sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             cd /home/anhye0n/web/tutorial_sejong/backend/
             git submodule update --init --recursive
+
             CURRENT_PID=\$(lsof -t -i:8080)
             if [ -n "\$CURRENT_PID" ]; then
               echo "Stopping process using port 8080 with PID \$CURRENT_PID"
               echo ${{ secrets.SSH_PASSWORD }} | sudo -S kill -9 \$CURRENT_PID
             fi
+
+            # systemd 설정 변경/추가 후 재로딩
+            echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl daemon-reload
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl restart tutorial_sejong_backend
             echo ${{ secrets.SSH_PASSWORD }} | sudo -S systemctl status tutorial_sejong_backend
+
+            # DB 스크립트 실행 (15초 대기 후)
             sleep 15
             mysql -u ${{ secrets.MARIADB_ID }} -p${{ secrets.MARIADB_PASSWORD }} < /home/anhye0n/web/tutorial_sejong/backend/tutorial_sejong.sql
           EOF
