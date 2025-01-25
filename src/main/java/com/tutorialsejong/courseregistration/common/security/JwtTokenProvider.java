@@ -15,7 +15,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,19 +84,19 @@ public class JwtTokenProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         } catch (ExpiredJwtException ex) {
-            String username = getUsernameFromJWT(token);
+            String username = ex.getClaims().getSubject();
             logger.warn(LogMessage.builder()
-                            .action(LogAction.VALIDATE_TOKEN)
-                            .subject("s"+username)
-                            .result(LogResult.FAIL)
-                            .reason(LogReason.EXPIRED)
+                    .action(LogAction.VALIDATE_TOKEN)
+                    .subject("s" + username)
+                    .result(LogResult.FAIL)
+                    .reason(LogReason.EXPIRED)
                     .build().toString());
             throw new JwtTokenExpiredException();
         } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
             String username = getUsernameFromJWT(token);
             logger.warn(LogMessage.builder()
                     .action(LogAction.VALIDATE_TOKEN)
-                    .subject("s"+username)
+                    .subject("s" + username)
                     .result(LogResult.FAIL)
                     .reason(LogReason.INVALID_CREDENTIAL)
                     .build().toString());
