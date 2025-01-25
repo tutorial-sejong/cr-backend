@@ -93,10 +93,9 @@ public class JwtTokenProvider {
                     .build().toString());
             throw new JwtTokenExpiredException();
         } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
-            String username = getUsernameFromJWT(token);
             logger.warn(LogMessage.builder()
                     .action(LogAction.VALIDATE_TOKEN)
-                    .subject("s" + username)
+                    .subject("unknown")
                     .result(LogResult.FAIL)
                     .reason(LogReason.INVALID_CREDENTIAL)
                     .build().toString());
