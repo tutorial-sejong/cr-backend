@@ -33,8 +33,8 @@ do
 done < .env
 
 # SSH key 설정 (선택적)
-if [ -f ~/.ssh/id_rsa ]; then
-   gh secret set SSH_PRIVATE_KEY -b"$(cat ~/.ssh/id_rsa)" --env $ENVIRONMENT || exit 1
+if [ -f ~/.ssh/id_ed25519 ]; then
+   gh secret set SSH_PRIVATE_KEY -b"$(cat ~/.ssh/id_ed25519)" --env $ENVIRONMENT || exit 1
 fi
 
 echo "✅ ${GREEN}GitHub ${ENVIRONMENT} environment secrets 설정이 완료되었습니다!${NC}"
