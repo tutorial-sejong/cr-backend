@@ -2,9 +2,9 @@ name: Deploy to Development Server
 
 on:
   push:
-    branches: [docker-server]
+    branches: [develop]
   pull_request:
-    branches: [docker-server]
+    branches: [develop]
 
 jobs:
   build-and-deploy:
