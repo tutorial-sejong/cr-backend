@@ -110,7 +110,5 @@ jobs:
             # 상태 확인
             docker-compose ps
             
-            # 주간 클린업 (일요일에만)
-            if [ $(date +%u) -eq 7 ]; then
-              docker image prune -f --filter "until=168h"
-            fi
+            # 미사용 이미지 정리
+            docker image prune -f --filter "until=168h"
