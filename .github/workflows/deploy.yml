@@ -59,7 +59,8 @@ jobs:
           context: .
           file: docker-files/backend/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/backend:latest
+          tags: ${{ secrets.BACKEND_IMAGE }}
+          platforms: linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -99,12 +100,12 @@ jobs:
             BACKEND_PORT=${{ secrets.BACKEND_PORT }}
             NGINX_PORT=${{ secrets.NGINX_PORT }}
             DB_PORT=${{ secrets.DB_PORT }}
-            GITHUB_REPOSITORY=${{ github.repository }}
+            BACKEND_IMAGE=${{ secrets.BACKEND_IMAGE }}
             EOL
             
             # 백엔드만 재배포
             docker-compose pull backend
-            docker-compose up -d --build --no-deps backend
+            docker-compose up -d --no-deps backend
             
             # 상태 확인
             docker-compose ps

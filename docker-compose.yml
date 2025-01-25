@@ -36,7 +36,7 @@ services:
    restart: unless-stopped
 
  backend:
-   image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest-arm64
+   image: ${BACKEND_IMAGE}
    platform: linux/arm64
    container_name: cr-backend
    depends_on:
