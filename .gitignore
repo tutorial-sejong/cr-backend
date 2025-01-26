@@ -40,3 +40,4 @@ application*.properties
 src/main/resources/config
 
 logs/*
+.env
